@@ -13,4 +13,5 @@ class ZOINKS(commands.Bot):
             command_prefix=commands.when_mentioned_or(command_prefix), description=description, pm_help=None)
 
     async def on_ready(self):
+        await self.change_presence(game=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
         print(f'{self.user} ({self.user.id}) has logged in')
