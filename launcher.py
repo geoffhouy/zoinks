@@ -2,6 +2,6 @@ import config
 from zoinks.bot import ZOINKS
 
 
-bot = ZOINKS()
-
-bot.run(config.DISCORD_TOKEN)
+if __name__ == '__main__':
+    bot = ZOINKS()
+    bot.run(config.DISCORD_TOKEN)
