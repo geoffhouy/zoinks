@@ -1,8 +1,7 @@
 import config
+from zoinks.bot import ZOINKS
 
-from discord.ext import commands
 
-
-bot = commands.Bot(command_prefix='!')
+bot = ZOINKS()
 
 bot.run(config.DISCORD_TOKEN)
