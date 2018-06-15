@@ -20,3 +20,7 @@ class ZOINKS(commands.Bot):
         if message.author.bot:
             pass
         await self.process_commands(message)
+
+    async def on_command_error(self, error, context):
+        if isinstance(error, commands.errors.CommandNotFound):
+            pass
