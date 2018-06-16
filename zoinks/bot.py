@@ -1,9 +1,13 @@
 import discord
 from discord.ext import commands
 
+import logging
+
 
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
+
+logger = logging.getLogger(__name__)
 
 
 class ZOINKS(commands.Bot):
@@ -16,6 +20,7 @@ class ZOINKS(commands.Bot):
 
     async def on_ready(self):
         await self.change_presence(game=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
+        logger.info(f'{self.user} ({self.user.id}) logged in')
 
     async def on_message(self, message):
         if message.author.bot:
