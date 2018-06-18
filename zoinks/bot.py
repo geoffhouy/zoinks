@@ -7,7 +7,7 @@ import logging
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
-extensions = ()
+extensions = ('zoinks.cogs.realm_royale', )
 
 logger = logging.getLogger(__name__)
 
