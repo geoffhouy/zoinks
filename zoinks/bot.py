@@ -7,6 +7,8 @@ import logging
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
+extensions = ()
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,6 +19,11 @@ class ZOINKS(commands.Bot):
             command_prefix=commands.when_mentioned_or(command_prefix),
             description=description,
             pm_help=None)
+        for extension in extensions:
+            try:
+                self.load_extension(extension)
+            except ModuleNotFoundError as e:
+                logger.warning(f'{e}')
 
     async def on_ready(self):
         await self.change_presence(game=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
