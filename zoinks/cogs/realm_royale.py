@@ -14,7 +14,7 @@ class RealmRoyale:
             endpoint='457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBURuFpabGUzusUzdsT2Fi',
             source='https://store.steampowered.com/news/?appids=813820',
             navigate_html=lambda soup: soup.find(
-                'div', _class='newsPostBlock steam_community_announcements').find('a').get('href'),
+                'div', class_='newsPostBlock steam_community_announcements').find('a').get('href'),
             poll_delay=900,
             title='Realm Royale',
             icon_url='https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg',
