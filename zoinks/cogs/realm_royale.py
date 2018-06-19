@@ -1,4 +1,4 @@
-from zoinks.webhook import ScrapingWebhook
+from zoinks.webhooks import ScrapingWebhook
 
 import logging
 
