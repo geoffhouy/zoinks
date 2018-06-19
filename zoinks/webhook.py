@@ -11,9 +11,58 @@ logger = logging.getLogger(__name__)
 
 
 class Webhook:
+
+    def __init__(self, endpoint, **kwargs):
+        self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
+        self.content = kwargs.get('content')
+        self._headers = ({'Content-Type': 'application/json'}, {'User-Agent': 'Mozilla/5.0'})
+
+    def format(self, payload):
+        raise NotImplementedError
+
+    def post(self, content: None):
+        if self.content is None and content is None:
+            logger.warning('Failed to POST: No content')
+            return
+        content = content if content else self.content
+        payload = {'content': content}
+        response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
+        if response.status_code == 400:
+            logger.info(f'Failed to POST {content}: {response.status_code}')
+        else:
+            logger.info(f'POST {content}')
+
+
+class RichWebhook(Webhook):
+
+    def __init__(self, endpoint, **kwargs):
+        super().__init__(endpoint)
+        self.embed = kwargs.get('embed')
+
+    def format(self, payload: discord.Embed):
+        return payload.to_dict()
+
+    def post(self, embed: None):
+        if self.embed is None and embed is None:
+            logger.warning('Failed to POST: No embed')
+            return
+        if isinstance(embed, discord.Embed):
+            embed = self.format(embed)
+        embed = embed if embed else self.embed
+        title = embed.get('title')
+        payload = {'embeds': [embed]}
+        response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
+        if response.status_code == 400:
+            logger.info(f'Failed to POST {title}: {response.status_code}')
+        else:
+            logger.info(f'POST {title}')
+
+
+class ScrapingWebhook(RichWebhook):
     """Represents a basic webhook using Discord's endpoint URL.
 
     Used to check websites for new news articles and POST them to Discord automatically.
+    Formats news article information into an rich embedded message.
 
     Attributes
     ----------
@@ -33,30 +82,16 @@ class Webhook:
         The color of the embed to POST.
     """
     def __init__(self, endpoint, **kwargs):
-        self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
-        self.source = kwargs.get('source', None)
-        self.navigate_html = kwargs.get('navigate_html', None)
+        super().__init__(endpoint)
+        self.source = kwargs.get('source')
+        self.navigate_html = kwargs.get('navigate_html')
         self.poll_delay = kwargs.get('poll_delay', 3600)
-        self.title = kwargs.get('title', None)
+        self.title = kwargs.get('title')
         self.icon_url = kwargs.get('icon_url', '')
         self.color = kwargs.get('color', 0x000000)
         self.is_running = True
-        self._headers = ({'Content-Type': 'application/json'}, {'User-Agent': 'Mozilla/5.0'})
 
-    async def poll(self):
-        last_post_url = ''
-        while self.is_running:
-            post_url = self.find()
-            if post_url == last_post_url:
-                pass
-            else:
-                embed = self.get(post_url)
-                if embed is not None:
-                    self.post(embed)
-                    last_post_url = post_url
-            await asyncio.sleep(self.poll_delay)
-
-    def find(self):
+    def _find_article(self):
         try:
             response = requests.get(url=self.source, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
@@ -67,7 +102,7 @@ class Webhook:
             post_url = self.navigate_html(soup)
             return post_url
 
-    def get(self, post_url):
+    def _build_embed(self, post_url):
         try:
             response = requests.get(url=post_url, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
@@ -76,8 +111,8 @@ class Webhook:
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
             description = soup.find('meta', property='og:description').get('content')
-            if len(description) > 300:
-                description = f'{description[:303]}...'
+            if len(description) > 250:
+                description = f'{description[:253]}...'
             embed = discord.Embed(
                 title=soup.find('meta', property='og:title').get('content'),
                 url=post_url,
@@ -85,14 +120,17 @@ class Webhook:
                 color=self.color)
             embed.set_thumbnail(url=soup.find('meta', property='og:image').get('content'))
             embed.set_footer(text=self.title, icon_url=self.icon_url)
-            return embed.to_dict()
+            return self.format(embed)
 
-    def post(self, embed):
-        title = embed.get('title')
-        payload = {'embeds': [embed]}
-        payload = json.dumps(payload, indent=4)
-        response = requests.post(self.endpoint, data=payload, headers=self._headers[0])
-        if response.status_code == 400:
-            logger.info(f'"{title}" failed to POST: {response.status_code}')
-        else:
-            logger.info(f'POST "{title}"')
+    async def poll(self):
+        last_article = ''
+        while self.is_running:
+            article = self._find_article()
+            if article == last_article:
+                pass
+            else:
+                embed = self._build_embed(article)
+                if embed is not None:
+                    self.post(embed)
+                    last_article = article
+            await asyncio.sleep(self.poll_delay)
