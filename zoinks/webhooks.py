@@ -99,8 +99,8 @@ class ScrapingWebhook(RichWebhook):
             return None
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
-            post_url = self.navigate_html(soup)
-            return post_url
+            article = self.navigate_html(soup)
+            return article
 
     def _build_embed(self, post_url):
         try:
