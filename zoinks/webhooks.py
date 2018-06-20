@@ -11,7 +11,17 @@ logger = logging.getLogger(__name__)
 
 
 class Webhook:
+    """Represents a basic webhook using Discord's endpoint URL.
 
+    Used to post a simple text message.
+
+    Attributes
+    ----------
+    endpoint: str
+        The Discord webhook endpoint URL contents after '/api/webhooks/'.
+    content: str
+        The content of the message to POST.
+    """
     def __init__(self, endpoint, **kwargs):
         self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
         self.content = kwargs.get('content')
@@ -34,7 +44,17 @@ class Webhook:
 
 
 class RichWebhook(Webhook):
+    """Represents a basic webhook using Discord's endpoint URL.
 
+    Used to post a rich Discord embed message.
+
+    Attributes
+    ----------
+    endpoint: str
+        The Discord webhook endpoint URL contents after '/api/webhooks/'.
+    embed: str
+        The Discord embed to POST.
+    """
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint)
         self.embed = kwargs.get('embed')
@@ -74,24 +94,21 @@ class ScrapingWebhook(RichWebhook):
         The BeautifulSoup function chain to find new content from the source.
     poll_delay: int
         The downtime between finding new content to POST.
-    title: str
-        The footer title of the embed to POST.
-    icon_url: str
-        The footer icon of the embed to POST.
     color: int
         The color of the embed to POST.
+    footer: tuple
+        The footer text and footer icon of the embed to POST.
     """
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint)
         self.source = kwargs.get('source')
         self.navigate_html = kwargs.get('navigate_html')
         self.poll_delay = kwargs.get('poll_delay', 3600)
-        self.title = kwargs.get('title')
-        self.icon_url = kwargs.get('icon_url', '')
-        self.color = kwargs.get('color', 0x000000)
+        self.color = kwargs.get('color')
+        self.footer = kwargs.get('footer', (None, None))
         self.is_running = True
 
-    def _find_article(self):
+    def find_article(self):
         try:
             response = requests.get(url=self.source, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
@@ -102,35 +119,44 @@ class ScrapingWebhook(RichWebhook):
             article = self.navigate_html(soup)
             return article
 
-    def _build_embed(self, post_url):
+    def build_embed(self, article):
         try:
-            response = requests.get(url=post_url, headers=self._headers[1])
+            response = requests.get(url=article, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
             logger.warning(f'{e}')
             return None
         else:
             soup = BeautifulSoup(response.content, 'html.parser')
-            description = soup.find('meta', property='og:description').get('content')
-            if len(description) > 250:
-                description = f'{description[:253]}...'
+            title = soup.find('meta', property='og:title')
+            title = title.get('content') if title else ''
+            description = soup.find('meta', property='og:description')
+            description = description.get('content') if description else ' '
+            description = f'{description[:253]}...' if len(description) > 250 else description
             embed = discord.Embed(
-                title=soup.find('meta', property='og:title').get('content'),
-                url=post_url,
+                title=title,
+                url=article,
                 description=description,
                 color=self.color)
-            embed.set_thumbnail(url=soup.find('meta', property='og:image').get('content'))
-            embed.set_footer(text=self.title, icon_url=self.icon_url)
-            return self.format(embed)
+            thumbnail_url = soup.find('meta', property='og:image')
+            thumbnail_url = thumbnail_url.get('content') if thumbnail_url else ''
+            embed.set_thumbnail(url=thumbnail_url)
+            text, icon_url = self.footer
+            if text or icon_url:
+                if text is None:
+                    text = 'Untitled'
+                if icon_url is None:
+                    icon_url = ''
+                embed.set_footer(text=text, icon_url=icon_url)
+            return embed
 
     async def poll(self):
         last_article = ''
         while self.is_running:
-            article = self._find_article()
-            if article == last_article:
-                pass
-            else:
-                embed = self._build_embed(article)
-                if embed is not None:
+            article = self.find_article()
+            if article and article != last_article:
+                embed = self.build_embed(article)
+                if embed:
+                    embed = self.format(embed)
                     self.post(embed)
                     last_article = article
             await asyncio.sleep(self.poll_delay)
