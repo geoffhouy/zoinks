@@ -3,6 +3,7 @@ import discord
 import asyncio
 import json
 import logging
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -160,3 +161,59 @@ class ScrapingWebhook(RichWebhook):
                     self.post(embed)
                     last_article = article
             await asyncio.sleep(self.poll_delay)
+
+
+class SteamWebhook(ScrapingWebhook):
+    """Represents a basic webhook using Discord's endpoint URL.
+
+    Used to check a Steam game's RSS feed for new updates and POST them to Discord automatically.
+
+    Attributes
+    ----------
+    endpoint: str
+        The Discord webhook endpoint URL contents after '/api/webhooks/'.
+    source: str
+        The source URL of the content.
+    poll_delay: int
+        The downtime between finding new content to POST.
+    color: int
+        The color of the embed to POST.
+    footer: tuple
+        The footer text and footer icon of the embed to POST.
+    """
+    def __init__(self, endpoint, **kwargs):
+        super().__init__(endpoint, **kwargs)
+
+    def find_article(self):
+        try:
+            response = requests.get(url=self.source, headers=self._headers[1])
+        except requests.exceptions.RequestException as e:
+            logger.warning(f'{e}')
+            return None
+        else:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            return soup.select_one('item')
+
+    def build_embed(self, article):
+        title = article.find('title').get_text(strip=True)
+        article_url = article.find('guid').get_text(strip=True)
+        description = article.find('description').get_text(strip=True)
+        description = re.sub('<[^<]+?>', '', description)
+        if len(description) > 250:
+            description = f'{description[:253]}...'
+        embed = discord.Embed(
+            title=title,
+            url=article_url,
+            description=description,
+            color=self.color)
+        thumbnail_url = article.find('description').get_text(strip=True)
+        thumbnail_url = re.search('<img src=\"(.*\.(?:png|jpg))\"\s+>', thumbnail_url).group(1)
+        if thumbnail_url:
+            embed.set_thumbnail(url=thumbnail_url)
+        text, icon_url = self.footer
+        if text is None:
+            text = 'Untitled'
+        if icon_url is None:
+            icon_url = ''
+        embed.set_footer(text=text, icon_url=icon_url)
+        return embed
