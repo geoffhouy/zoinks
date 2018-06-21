@@ -135,8 +135,8 @@ class ScrapingWebhook(RichWebhook):
             thumbnail_url = soup.find('meta', property='og:image')
             thumbnail_url = thumbnail_url.get('content') if thumbnail_url else ''
             embed.set_thumbnail(url=thumbnail_url)
-            text, icon_url = self.footer
-            if text or icon_url:
+            if self.footer:
+                text, icon_url = self.footer
                 if text is None:
                     text = 'Untitled'
                 if icon_url is None:
@@ -203,10 +203,11 @@ class SteamWebhook(ScrapingWebhook):
         thumbnail_url = re.search('<img src=\"(.*\.(?:png|jpg))\"\s+>', thumbnail_url).group(1)
         if thumbnail_url:
             embed.set_thumbnail(url=thumbnail_url)
-        text, icon_url = self.footer
-        if text is None:
-            text = 'Untitled'
-        if icon_url is None:
-            icon_url = ''
-        embed.set_footer(text=text, icon_url=icon_url)
+        if self.footer:
+            text, icon_url = self.footer
+            if text is None:
+                text = 'Untitled'
+            if icon_url is None:
+                icon_url = ''
+            embed.set_footer(text=text, icon_url=icon_url)
         return embed
