@@ -28,9 +28,6 @@ class Webhook:
         self.content = kwargs.get('content')
         self._headers = ({'Content-Type': 'application/json'}, {'User-Agent': 'Mozilla/5.0'})
 
-    def format(self, payload):
-        raise NotImplementedError
-
     def post(self, content: None):
         if self.content is None and content is None:
             logger.warning('Failed to POST: No content')
@@ -60,15 +57,12 @@ class RichWebhook(Webhook):
         super().__init__(endpoint)
         self.embed = kwargs.get('embed')
 
-    def format(self, payload: discord.Embed):
-        return payload.to_dict()
-
     def post(self, embed: None):
         if self.embed is None and embed is None:
             logger.warning('Failed to POST: No embed')
             return
         if isinstance(embed, discord.Embed):
-            embed = self.format(embed)
+            embed = embed.to_dict()
         embed = embed if embed else self.embed
         title = embed.get('title')
         payload = {'embeds': [embed]}
@@ -148,7 +142,7 @@ class ScrapingWebhook(RichWebhook):
                 if icon_url is None:
                     icon_url = ''
                 embed.set_footer(text=text, icon_url=icon_url)
-            return embed
+            return embed.to_dict()
 
     async def poll(self):
         last_article = ''
@@ -157,7 +151,6 @@ class ScrapingWebhook(RichWebhook):
             if article and article != last_article:
                 embed = self.build_embed(article)
                 if embed:
-                    embed = self.format(embed)
                     self.post(embed)
                     last_article = article
             await asyncio.sleep(self.poll_delay)
