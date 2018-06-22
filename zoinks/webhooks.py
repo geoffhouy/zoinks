@@ -25,14 +25,14 @@ class Webhook:
     """
     def __init__(self, endpoint, **kwargs):
         self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
-        self.content = kwargs.get('content')
+        self.__content = kwargs.get('content')
         self._headers = ({'Content-Type': 'application/json'}, {'User-Agent': 'Mozilla/5.0'})
 
     def post(self, content: None):
-        if self.content is None and content is None:
+        if self.__content is None and content is None:
             logger.warning('Failed to POST: No content')
             return
-        content = content if content else self.content
+        content = content if content else self.__content
         payload = {'content': content}
         response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
         if response.status_code == 400:
@@ -55,15 +55,15 @@ class RichWebhook(Webhook):
     """
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint)
-        self.embed = kwargs.get('embed')
+        self.__embed = kwargs.get('embed')
 
     def post(self, embed: None):
-        if self.embed is None and embed is None:
+        if self.__embed is None and embed is None:
             logger.warning('Failed to POST: No embed')
             return
+        embed = embed if embed else self.__embed
         if isinstance(embed, discord.Embed):
             embed = embed.to_dict()
-        embed = embed if embed else self.embed
         title = embed.get('title')
         payload = {'embeds': [embed]}
         response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
