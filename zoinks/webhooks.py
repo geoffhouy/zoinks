@@ -103,7 +103,7 @@ class ScrapingWebhook(RichWebhook):
         self.footer = kwargs.get('footer', (None, None))
         self.is_running = True
 
-    def find_article(self):
+    def fetch_article(self):
         try:
             response = requests.get(url=self.source, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
@@ -147,7 +147,7 @@ class ScrapingWebhook(RichWebhook):
     async def poll(self):
         last_article = ''
         while self.is_running:
-            article = self.find_article()
+            article = self.fetch_article()
             if article and article != last_article:
                 embed = self.build_embed(article)
                 if embed:
@@ -177,7 +177,7 @@ class SteamWebhook(ScrapingWebhook):
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint, **kwargs)
 
-    def find_article(self):
+    def fetch_article(self):
         try:
             response = requests.get(url=self.source, headers=self._headers[1])
         except requests.exceptions.RequestException as e:
