@@ -10,6 +10,7 @@ endpoint = '457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBU
 
 webhook_config = {
     'realm_royale': {
+        'name': ('realm royale', 'realm', 'rr'),
         'class': SteamWebhook,
         'kwargs': {
             'source': 'https://steamcommunity.com/games/813820/rss/',
@@ -20,6 +21,7 @@ webhook_config = {
         }
     },
     'league_of_legends': {
+        'name': ('league of legends', 'league', 'lol'),
         'class': ScrapingWebhook,
         'kwargs': {
             'source': 'https://na.leagueoflegends.com/en/news/game-updates/patch',
