@@ -25,20 +25,26 @@ class Webhook:
     """
     def __init__(self, endpoint, **kwargs):
         self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
-        self.__content = kwargs.get('content')
-        self._headers = ({'Content-Type': 'application/json'}, {'User-Agent': 'Mozilla/5.0'})
+        self.content = kwargs.get('content')
 
-    def post(self, content: None):
-        if self.__content is None and content is None:
-            logger.warning('Failed to POST: No content')
-            return
-        content = content if content else self.__content
-        payload = {'content': content}
-        response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
+    def post(self, content=None):
+        if self.content is None and content is None:
+            raise ValueError('Content must be set before posting')
+
+        content_to_post = None
+        if self.content:
+            content_to_post = self.content
+        if content:
+            content_to_post = content
+
+        payload = {'content': content_to_post}
+        response = requests.post(self.endpoint,
+                                 data=json.dumps(payload, indent=4),
+                                 headers={'Content-Type': 'application/json'})
         if response.status_code == 400:
-            logger.info(f'Failed to POST {content}: {response.status_code}')
+            logger.info(f'Failed to POST {content_to_post}: {response.status_code}')
         else:
-            logger.info(f'POST {content}')
+            logger.info(f'POST {content_to_post}')
 
 
 class RichWebhook(Webhook):
@@ -55,18 +61,27 @@ class RichWebhook(Webhook):
     """
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint)
-        self.__embed = kwargs.get('embed')
+        self.embed = kwargs.get('embed')
 
-    def post(self, embed: None):
-        if self.__embed is None and embed is None:
-            logger.warning('Failed to POST: No embed')
-            return
-        embed = embed if embed else self.__embed
-        if isinstance(embed, discord.Embed):
-            embed = embed.to_dict()
-        title = embed.get('title')
-        payload = {'embeds': [embed]}
-        response = requests.post(self.endpoint, data=json.dumps(payload, indent=4), headers=self._headers[0])
+    def post(self, embed=None):
+        if self.embed is None and embed is None:
+            raise ValueError('Embed must be set before posting')
+
+        if not isinstance(self.embed, discord.Embed) and not isinstance(embed, discord.Embed):
+            raise ValueError('Embed must be of type discord.Embed')
+
+        embed_to_post = None
+        if self.embed:
+            embed_to_post = self.embed
+        if embed:
+            embed_to_post = embed
+        embed_to_post = embed_to_post.to_dict()
+
+        title = embed_to_post.get('title')
+        payload = {'embeds': [embed_to_post]}
+        response = requests.post(self.endpoint,
+                                 data=json.dumps(payload, indent=4),
+                                 headers={'Content-Type': 'application/json'})
         if response.status_code == 400:
             logger.info(f'Failed to POST {title}: {response.status_code}')
         else:
@@ -86,9 +101,9 @@ class ScrapingWebhook(RichWebhook):
     source: str
         The source URL of the content.
     navigate_html: function
-        The BeautifulSoup function chain to find new content from the source.
+        The BeautifulSoup function chain to find new articles from the source URL.
     poll_delay: int
-        The downtime between finding new content to POST.
+        The downtime between checking for new information to POST.
     color: int
         The color of the embed to POST.
     footer: tuple
@@ -103,56 +118,65 @@ class ScrapingWebhook(RichWebhook):
         self.footer = kwargs.get('footer', (None, None))
         self.is_running = True
 
-    def fetch_article(self):
-        try:
-            response = requests.get(url=self.source, headers=self._headers[1])
-        except requests.exceptions.RequestException as e:
-            logger.warning(f'{e}')
+    def find_article(self):
+        soup = fetch_soup(self.source)
+        if soup is None:
             return None
-        else:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            article = self.navigate_html(soup)
-            return article
+        article_url = self.navigate_html(soup)
+        return article_url
 
-    def build_embed(self, article):
-        try:
-            response = requests.get(url=article, headers=self._headers[1])
-        except requests.exceptions.RequestException as e:
-            logger.warning(f'{e}')
+    def build_embed(self, article_url):
+        article = fetch_soup(article_url)
+
+        if article is None:
             return None
+
+        title = article.find(property='og:title')
+        if title:
+            title = title.get('content')
         else:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title = soup.find('meta', property='og:title')
-            title = title.get('content') if title else ''
-            description = soup.find('meta', property='og:description')
-            description = description.get('content') if description else ' '
-            description = f'{description[:253]}...' if len(description) > 250 else description
-            embed = discord.Embed(
-                title=title,
-                url=article,
-                description=description,
-                color=self.color)
-            thumbnail_url = soup.find('meta', property='og:image')
-            thumbnail_url = thumbnail_url.get('content') if thumbnail_url else ''
-            embed.set_thumbnail(url=thumbnail_url)
-            if self.footer:
-                text, icon_url = self.footer
-                if text is None:
-                    text = 'Untitled'
-                if icon_url is None:
-                    icon_url = ''
-                embed.set_footer(text=text, icon_url=icon_url)
-            return embed.to_dict()
+            title = ''
+
+        description = article.find(property='og:description')
+        if description:
+            description = description.get('content')
+            if len(description) > 250:
+                description = f'{description[:253]}'
+        else:
+            description = ''
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            url=article_url,
+            color=self.color)
+
+        thumbnail_url = article.find(property='og:image')
+        if thumbnail_url:
+            thumbnail_url = thumbnail_url.get('content')
+        else:
+            thumbnail_url = ''
+        embed.set_thumbnail(url=thumbnail_url)
+
+        if self.footer:
+            text, icon_url = self.footer
+            if text is None:
+                text = ''
+            if icon_url is None:
+                icon_url = ''
+            embed.set_footer(text=text, icon_url=icon_url)
+
+        return embed
 
     async def poll(self):
         last_article = ''
         while self.is_running:
-            article = self.fetch_article()
+            article = self.find_article()
             if article and article != last_article:
                 embed = self.build_embed(article)
                 if embed:
                     self.post(embed)
-                    last_article = article
+                last_article = article
             await asyncio.sleep(self.poll_delay)
 
 
@@ -168,7 +192,7 @@ class SteamWebhook(ScrapingWebhook):
     source: str
         The source URL of the content.
     poll_delay: int
-        The downtime between finding new content to POST.
+        The downtime between checking for new information to POST.
     color: int
         The color of the embed to POST.
     footer: tuple
@@ -177,32 +201,34 @@ class SteamWebhook(ScrapingWebhook):
     def __init__(self, endpoint, **kwargs):
         super().__init__(endpoint, **kwargs)
 
-    def fetch_article(self):
-        try:
-            response = requests.get(url=self.source, headers=self._headers[1])
-        except requests.exceptions.RequestException as e:
-            logger.warning(f'{e}')
+    def find_article(self):
+        soup = fetch_soup(self.source)
+        if soup is None:
             return None
-        else:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            return soup.select_one('item')
+        item = soup.select_one('item')
+        return item
 
-    def build_embed(self, article):
-        title = article.find('title').get_text(strip=True)
-        article_url = article.find('guid').get_text(strip=True)
-        description = article.find('description').get_text(strip=True)
+    def build_embed(self, item):
+        title = item.find('title').get_text(strip=True)
+
+        article_url = item.find('guid').get_text(strip=True)
+
+        description = item.find('description').get_text(strip=True)
         description = re.sub('<[^<]+?>', '', description)
         if len(description) > 250:
             description = f'{description[:253]}...'
+
         embed = discord.Embed(
             title=title,
             url=article_url,
             description=description,
             color=self.color)
-        thumbnail_url = article.find('description').get_text(strip=True)
+
+        thumbnail_url = item.find('description').get_text(strip=True)
         thumbnail_url = re.search('<img src=\"(.*\.(?:png|jpg))\"\s+>', thumbnail_url).group(1)
         if thumbnail_url:
             embed.set_thumbnail(url=thumbnail_url)
+
         if self.footer:
             text, icon_url = self.footer
             if text is None:
@@ -210,4 +236,16 @@ class SteamWebhook(ScrapingWebhook):
             if icon_url is None:
                 icon_url = ''
             embed.set_footer(text=text, icon_url=icon_url)
+
         return embed
+
+
+def fetch_soup(url):
+    try:
+        response = requests.get(url=url, headers={'User-Agent': 'Mozilla/5.0'})
+    except requests.exceptions.RequestException as e:
+        logger.warning(f'{e}')
+        return None
+    else:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        return soup
