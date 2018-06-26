@@ -3,249 +3,167 @@ import discord
 import asyncio
 import json
 import logging
-import re
-import requests
 from bs4 import BeautifulSoup
 
+
+get_headers = {'User-Agent': 'Mozilla/5.0'}
+post_headers = {'Content-Type': 'application/json'}
 
 logger = logging.getLogger(__name__)
 
 
 class Webhook:
-    """Represents a basic webhook using Discord's endpoint URL.
+    """Represents a basic webhook using Discord's endpoint URL*.
 
-    Used to post a simple text message.
+    Used to post a simple text message into the specified Discord channel**.
+
+    *The endpoint URL can be retrieved by creating one for a Discord server in its settings.
+    **The endpoint URL will dictate which channel the message will be displayed in.
 
     Attributes
     ----------
     endpoint: str
-        The Discord webhook endpoint URL contents after '/api/webhooks/'.
+        The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     content: str
-        The content of the message to POST.
+        The message to post.
     """
-    def __init__(self, endpoint, **kwargs):
+    def __init__(self, bot, endpoint, **kwargs):
+        self.session = bot.session
         self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
-        self.content = kwargs.get('content')
+        self.__content = kwargs.get('content')
 
-    def post(self, content=None):
-        if self.content is None and content is None:
+    async def post(self, content=None):
+        if self.__content is None and content is None:
             raise ValueError('Content must be set before posting')
-
-        content_to_post = None
-        if self.content:
-            content_to_post = self.content
+        post_content = None
+        if self.__content:
+            post_content = self.__content
         if content:
-            content_to_post = content
-
-        payload = {'content': content_to_post}
-        response = requests.post(self.endpoint,
-                                 data=json.dumps(payload, indent=4),
-                                 headers={'Content-Type': 'application/json'})
-        if response.status_code == 400:
-            logger.info(f'Failed to POST {content_to_post}: {response.status_code}')
-        else:
-            logger.info(f'POST {content_to_post}')
+            post_content = content
+        payload = {'content': post_content}
+        async with self.session.post(url=self.endpoint,
+                                     data=payload,
+                                     headers=post_headers) as response:
+            print(response)
 
 
 class RichWebhook(Webhook):
-    """Represents a basic webhook using Discord's endpoint URL.
+    """Represents a rich webhook using Discord's endpoint URL.
 
-    Used to post a rich Discord embed message.
+    Used to post a rich, embedded Discord message into the specified Discord channel.
 
     Attributes
     ----------
     endpoint: str
-        The Discord webhook endpoint URL contents after '/api/webhooks/'.
-    embed: str
-        The Discord embed to POST.
+        The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
+    embed: discord.Embed
+        The rich, embedded message to post.
     """
-    def __init__(self, endpoint, **kwargs):
-        super().__init__(endpoint)
-        self.embed = kwargs.get('embed')
+    def __init__(self, bot, endpoint, **kwargs):
+        super().__init__(bot, endpoint, **kwargs)
+        self.__embed = kwargs.get('embed')
 
-    def post(self, embed=None):
-        if self.embed is None and embed is None:
+    async def post(self, embed=None):
+        if self.__embed is None and embed is None:
             raise ValueError('Embed must be set before posting')
-
-        if not isinstance(self.embed, discord.Embed) and not isinstance(embed, discord.Embed):
+        if not isinstance(self.__embed, discord.Embed) and not isinstance(embed, discord.Embed):
             raise ValueError('Embed must be of type discord.Embed')
-
-        embed_to_post = None
-        if self.embed:
-            embed_to_post = self.embed
+        post_embed = None
+        if self.__embed:
+            post_embed = self.__embed
         if embed:
-            embed_to_post = embed
-        embed_to_post = embed_to_post.to_dict()
+            post_embed = embed
+        post_embed = post_embed.to_dict()
+        title = post_embed.get('title')
+        payload = {'embeds': [post_embed]}
+        async with self.session.post(url=self.endpoint,
+                                     data=json.dumps(payload, indent=4),
+                                     headers=post_headers) as response:
+            if response.status == 400:
+                logger.info(f'Failed to POST {title}: {response.status}')
+            else:
+                logger.info(f'POST {title}')
 
-        title = embed_to_post.get('title')
-        payload = {'embeds': [embed_to_post]}
-        response = requests.post(self.endpoint,
-                                 data=json.dumps(payload, indent=4),
-                                 headers={'Content-Type': 'application/json'})
-        if response.status_code == 400:
-            logger.info(f'Failed to POST {title}: {response.status_code}')
-        else:
-            logger.info(f'POST {title}')
 
+class URLWebhook(RichWebhook):
+    """Represents a URL-scraping webhook using Discord's endpoint URL.
 
-class ScrapingWebhook(RichWebhook):
-    """Represents a basic webhook using Discord's endpoint URL.
-
-    Used to check websites for new news articles and POST them to Discord automatically.
-    Formats news article information into an rich embedded message.
+    Used to post a rich, embedded Discord message built from the source URL's
+    news articles into the specified Discord channel.
 
     Attributes
     ----------
     endpoint: str
-        The Discord webhook endpoint URL contents after '/api/webhooks/'.
+        The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     source: str
-        The source URL of the content.
-    navigate_html: function
-        The BeautifulSoup function chain to find new articles from the source URL.
+        The source URL of the content to post.
+    navigate_html: lambda function
+        The BeautifulSoup function chain to find new articles within the source URL's HTML.
     poll_delay: int
-        The downtime between checking for new information to POST.
+        The downtime between checking for new articles to post.
     color: int
-        The color of the embed to POST.
+        The color of the discord.Embed to post.
     footer: tuple
-        The footer text and footer icon of the embed to POST.
+        The footer text and footer icon of the discord.Embed to post.
     """
-    def __init__(self, endpoint, **kwargs):
-        super().__init__(endpoint)
+    def __init__(self, bot, endpoint, **kwargs):
+        super().__init__(bot, endpoint, **kwargs)
         self.source = kwargs.get('source')
         self.navigate_html = kwargs.get('navigate_html')
-        self.poll_delay = kwargs.get('poll_delay', 3600)
-        self.color = kwargs.get('color')
+        self.poll_delay = kwargs.get('poll_delay')
+        self.color = kwargs.get('color', 0x000000)
         self.footer = kwargs.get('footer', (None, None))
         self.is_running = True
 
-    def find_article(self):
-        soup = fetch_soup(self.source)
-        if soup is None:
-            return None
-        article_url = self.navigate_html(soup)
-        return article_url
+    async def _fetch(self, url):
+        async with self.session.get(url=url, headers=get_headers) as response:
+            content = await response.text()
+            soup = BeautifulSoup(content, 'html.parser')
+            return soup
 
-    def build_embed(self, article_url):
-        article = fetch_soup(article_url)
+    async def _find(self):
+        soup = await self._fetch(self.source)
+        url = self.navigate_html(soup)
+        return url
 
-        if article is None:
-            return None
+    async def _build(self, url):
+        content = await self._fetch(url)
 
-        title = article.find(property='og:title')
-        if title:
-            title = title.get('content')
-        else:
-            title = ''
+        title = content.find(property='og:title')
+        title = title.get('content') if title else ''
 
-        description = article.find(property='og:description')
-        if description:
-            description = description.get('content')
-            if len(description) > 250:
-                description = f'{description[:253]}'
-        else:
-            description = ''
-
-        embed = discord.Embed(
-            title=title,
-            description=description,
-            url=article_url,
-            color=self.color)
-
-        thumbnail_url = article.find(property='og:image')
-        if thumbnail_url:
-            thumbnail_url = thumbnail_url.get('content')
-        else:
-            thumbnail_url = ''
-        embed.set_thumbnail(url=thumbnail_url)
-
-        if self.footer:
-            text, icon_url = self.footer
-            if text is None:
-                text = ''
-            if icon_url is None:
-                icon_url = ''
-            embed.set_footer(text=text, icon_url=icon_url)
-
-        return embed
-
-    async def poll(self):
-        last_article = ''
-        while self.is_running:
-            article = self.find_article()
-            if article and article != last_article:
-                embed = self.build_embed(article)
-                if embed:
-                    self.post(embed)
-                last_article = article
-            await asyncio.sleep(self.poll_delay)
-
-
-class SteamWebhook(ScrapingWebhook):
-    """Represents a basic webhook using Discord's endpoint URL.
-
-    Used to check a Steam game's RSS feed for new updates and POST them to Discord automatically.
-
-    Attributes
-    ----------
-    endpoint: str
-        The Discord webhook endpoint URL contents after '/api/webhooks/'.
-    source: str
-        The source URL of the content.
-    poll_delay: int
-        The downtime between checking for new information to POST.
-    color: int
-        The color of the embed to POST.
-    footer: tuple
-        The footer text and footer icon of the embed to POST.
-    """
-    def __init__(self, endpoint, **kwargs):
-        super().__init__(endpoint, **kwargs)
-
-    def find_article(self):
-        soup = fetch_soup(self.source)
-        if soup is None:
-            return None
-        item = soup.select_one('item')
-        return item
-
-    def build_embed(self, item):
-        title = item.find('title').get_text(strip=True)
-
-        article_url = item.find('guid').get_text(strip=True)
-
-        description = item.find('description').get_text(strip=True)
-        description = re.sub('<[^<]+?>', '', description)
+        description = content.find(property='og:description')
+        description = description.get('content') if description else ''
         if len(description) > 250:
             description = f'{description[:253]}...'
 
         embed = discord.Embed(
             title=title,
-            url=article_url,
             description=description,
-            color=self.color)
+            url=url,
+            color=self.color
+        )
 
-        thumbnail_url = item.find('description').get_text(strip=True)
-        thumbnail_url = re.search('<img src=\"(.*\.(?:png|jpg))\"\s+>', thumbnail_url).group(1)
-        if thumbnail_url:
-            embed.set_thumbnail(url=thumbnail_url)
+        thumbnail = content.find(property='og:image')
+        thumbnail = thumbnail.get('content') if thumbnail else ''
+        embed.set_thumbnail(url=thumbnail)
 
-        if self.footer:
-            text, icon_url = self.footer
-            if text is None:
-                text = 'Untitled'
-            if icon_url is None:
-                icon_url = ''
-            embed.set_footer(text=text, icon_url=icon_url)
+        text, icon_url = self.footer
+        if text is None:
+            text = ''
+        if icon_url is None:
+            icon_url = ''
+        embed.set_footer(text=text, icon_url=icon_url)
 
         return embed
 
-
-def fetch_soup(url):
-    try:
-        response = requests.get(url=url, headers={'User-Agent': 'Mozilla/5.0'})
-    except requests.exceptions.RequestException as e:
-        logger.warning(f'{e}')
-        return None
-    else:
-        soup = BeautifulSoup(response.content, 'html.parser')
-        return soup
+    async def poll(self):
+        last_post = ''
+        while self.is_running:
+            post = await self._find()
+            if post and post != last_post:
+                embed = await self._build(post)
+                if embed:
+                    await self.post(embed)
+                last_post = post
+            await asyncio.sleep(self.poll_delay)
