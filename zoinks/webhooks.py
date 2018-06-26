@@ -22,13 +22,15 @@ class Webhook:
 
     Attributes
     ----------
+    bot: commands.Bot
+        The currently running Discord bot. Used for its loop and its aiohttp.session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     content: str
         The message to post.
     """
     def __init__(self, bot, endpoint, **kwargs):
-        self.session = bot.session
+        self.bot = bot
         self.endpoint = f'https://discordapp.com/api/webhooks/{endpoint}'
         self.__content = kwargs.get('content')
 
@@ -41,7 +43,7 @@ class Webhook:
         if content:
             post_content = content
         payload = {'content': post_content}
-        async with self.session.post(url=self.endpoint,
+        async with self.bot.session.post(url=self.endpoint,
                                      data=payload,
                                      headers=post_headers) as response:
             print(response)
@@ -54,6 +56,8 @@ class RichWebhook(Webhook):
 
     Attributes
     ----------
+    bot: commands.Bot
+        The currently running Discord bot. Used for its loop and its aiohttp.session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     embed: discord.Embed
@@ -76,7 +80,7 @@ class RichWebhook(Webhook):
         post_embed = post_embed.to_dict()
         title = post_embed.get('title')
         payload = {'embeds': [post_embed]}
-        async with self.session.post(url=self.endpoint,
+        async with self.bot.session.post(url=self.endpoint,
                                      data=json.dumps(payload, indent=4),
                                      headers=post_headers) as response:
             if response.status == 400:
@@ -93,6 +97,8 @@ class URLWebhook(RichWebhook):
 
     Attributes
     ----------
+    bot: commands.Bot
+        The currently running Discord bot. Used for its loop and its aiohttp.session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     source: str
@@ -116,7 +122,7 @@ class URLWebhook(RichWebhook):
         self.is_running = True
 
     async def _fetch(self, url):
-        async with self.session.get(url=url, headers=get_headers) as response:
+        async with self.bot.session.get(url=url, headers=get_headers) as response:
             content = await response.text()
             soup = BeautifulSoup(content, 'html.parser')
             return soup
@@ -158,6 +164,7 @@ class URLWebhook(RichWebhook):
         return embed
 
     async def poll(self):
+        await self.bot.wait_until_ready()
         last_post = ''
         while self.is_running:
             post = await self._find()
