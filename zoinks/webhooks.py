@@ -23,7 +23,7 @@ class Webhook:
     Attributes
     ----------
     bot: commands.Bot
-        The currently running Discord bot. Used for its loop and its aiohttp.session.
+        The currently running Discord bot. Used for its session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     content: str
@@ -57,7 +57,7 @@ class RichWebhook(Webhook):
     Attributes
     ----------
     bot: commands.Bot
-        The currently running Discord bot. Used for its loop and its aiohttp.session.
+        The currently running Discord bot. Used for its session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     embed: discord.Embed
@@ -98,7 +98,7 @@ class URLWebhook(RichWebhook):
     Attributes
     ----------
     bot: commands.Bot
-        The currently running Discord bot. Used for its loop and its aiohttp.session.
+        The currently running Discord bot. Used for its session.
     endpoint: str
         The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
     source: str
