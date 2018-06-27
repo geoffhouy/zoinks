@@ -1,4 +1,4 @@
-from zoinks.webhooks import ScrapingWebhook, SteamWebhook
+from zoinks.webhooks import URLWebhook
 
 import discord
 from discord.ext import commands
@@ -11,9 +11,10 @@ endpoint = '457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBU
 webhook_config = {
     'realm_royale': {
         'name': ('realm royale', 'realm', 'rr'),
-        'class': SteamWebhook,
+        'class': URLWebhook,
         'kwargs': {
-            'source': 'https://steamcommunity.com/games/813820/rss/',
+            'source': 'https://store.steampowered.com/news/?appids=813820', #'https://steamcommunity.com/games/813820/rss/',
+            'navigate_html': lambda soup: soup.find('div', {'class': 'newsPostBlock steam_community_announcements'}).find('a').get('href'),
             'poll_delay': 60 * 60 * 24,  # 1 day
             'footer': ('Realm Royale',
                        'https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg'),
@@ -22,7 +23,7 @@ webhook_config = {
     },
     'league_of_legends': {
         'name': ('league of legends', 'league', 'lol'),
-        'class': ScrapingWebhook,
+        'class': URLWebhook,
         'kwargs': {
             'source': 'https://na.leagueoflegends.com/en/news/game-updates/patch',
             'base_url': 'https://na.leagueoflegends.com',
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 class GameNews:
 
-    __slots__ = ('bot', 'realm_royale')  # , 'league_of_legends')
+    __slots__ = ('bot', 'realm_royale') #'league_of_legends')
 
     def __init__(self, bot):
         self.bot = bot
@@ -61,7 +62,7 @@ class GameNews:
                 continue
             cls = webhook_config[slot]['class']
             kwargs = webhook_config[slot]['kwargs']
-            setattr(self, slot, cls(endpoint, **kwargs))
+            setattr(self, slot, cls(self.bot, endpoint, **kwargs))
             self.bot.loop.create_task(getattr(self, slot).poll())
 
 
