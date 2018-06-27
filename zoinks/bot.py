@@ -42,6 +42,8 @@ class ZOINKS(commands.Bot):
             return
         await self.process_commands(message)
 
-    async def on_command_error(self, error, context):
+    async def on_command_error(self, error, ctx):
         if isinstance(error, commands.errors.CommandNotFound):
+            pass
+        elif isinstance(error, commands.errors.MissingRequiredArgument):
             pass
