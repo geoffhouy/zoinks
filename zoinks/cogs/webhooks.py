@@ -41,7 +41,7 @@ webhook_config = {
 logger = logging.getLogger(__name__)
 
 
-class GameNews:
+class Webhooks:
 
     __slots__ = ('bot', 'realm_royale') #'league_of_legends')
 
@@ -67,4 +67,4 @@ class GameNews:
 
 
 def setup(bot):
-    bot.add_cog(GameNews(bot))
+    bot.add_cog(Webhooks(bot))
