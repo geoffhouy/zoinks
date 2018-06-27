@@ -1,4 +1,4 @@
-from zoinks.webhooks import URLWebhook
+from zoinks.webhooks import SteamRSSWebhook, URLWebhook
 
 import discord
 from discord.ext import commands
@@ -9,18 +9,17 @@ import logging
 endpoint = '457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBURuFpabGUzusUzdsT2Fi'
 
 webhook_config = {
-    'realm_royale': {
-        'name': 'Realm Royale',
-        'tag': ('realm royale', 'realm', 'rr'),
+    'darkest_dungeon': {
+        'name': 'Darkest Dungeon',
+        'tag': ('darkest dungeon', 'darkest', 'dd'),
         'emoji': '🎮',
-        'class': URLWebhook,
+        'class': SteamRSSWebhook,
         'kwargs': {
-            'source': 'https://store.steampowered.com/news/?appids=813820', #'https://steamcommunity.com/games/813820/rss/',
-            'navigate_html': lambda soup: soup.find('div', {'class': 'newsPostBlock steam_community_announcements'}).find('a').get('href'),
+            'source': 'https://steamcommunity.com/games/262060/rss/',
             'poll_delay': 60 * 60 * 24,  # 1 day
-            'footer': ('Realm Royale',
-                       'https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg'),
-            'color': 0x9D69F4
+            'footer': ('Darkest Dungeon',
+                       'https://steamcdn-a.akamaihd.net/steam/apps/262060/header.jpg'),
+            'color': 0xFB3512
         }
     },
     'league_of_legends': {
@@ -39,6 +38,19 @@ webhook_config = {
                        'https://cdn.leagueoflegends.com/riotbar/prod/1.6.154/images/navigation/icon-game-lol.png'),
             'color': 0x96692A
         }
+    },
+    'realm_royale': {
+        'name': 'Realm Royale',
+        'tag': ('realm royale', 'realm', 'rr'),
+        'emoji': '🎮',
+        'class': SteamRSSWebhook,
+        'kwargs': {
+            'source': 'https://steamcommunity.com/games/813820/rss/',
+            'poll_delay': 60 * 60 * 24,  # 1 day
+            'footer': ('Realm Royale',
+                       'https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg'),
+            'color': 0x9D69F4
+        }
     }
 }
 
@@ -47,7 +59,7 @@ logger = logging.getLogger(__name__)
 
 class Webhooks:
 
-    __slots__ = ('bot', 'realm_royale') #'league_of_legends')
+    __slots__ = ('bot', 'darkest_dungeon', 'realm_royale') #'league_of_legends')
 
     def __init__(self, bot):
         self.bot = bot
