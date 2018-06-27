@@ -1,4 +1,4 @@
-from zoinks.webhooks import SteamRSSWebhook, URLWebhook
+from zoinks.webhooks import LeagueOfLegendsWebhook, SteamRSSWebhook, URLWebhook
 
 import discord
 from discord.ext import commands
@@ -40,7 +40,7 @@ webhook_config = {
         'name': 'League of Legends',
         'tag': ('league of legends', 'league', 'lol'),
         'emoji': '🎮',
-        'class': URLWebhook,
+        'class': LeagueOfLegendsWebhook,
         'kwargs': {
             'source': 'https://na.leagueoflegends.com/en/news/game-updates/patch',
             'base_url': 'https://na.leagueoflegends.com',
@@ -74,7 +74,7 @@ logger = logging.getLogger(__name__)
 
 class Webhooks:
 
-    __slots__ = ('bot', 'darkest_dungeon', 'dota2', 'realm_royale') #'league_of_legends')
+    __slots__ = ('bot', 'darkest_dungeon', 'dota2', 'league_of_legends', 'realm_royale')
 
     def __init__(self, bot):
         self.bot = bot
