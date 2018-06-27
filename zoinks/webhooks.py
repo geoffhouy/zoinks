@@ -151,8 +151,7 @@ class URLWebhook(RichWebhook):
             title=title,
             description=description,
             url=url,
-            color=self.color
-        )
+            color=self.color)
 
         image = content.find(property='og:image')
         if image:
@@ -246,6 +245,69 @@ class SteamRSSWebhook(URLWebhook):
             text = 'Untitled'
         if icon_url is None:
             icon_url = ''
+        embed.set_footer(text=text, icon_url=icon_url)
+
+        return embed
+
+
+class LeagueOfLegendsWebhook(URLWebhook):
+    """Represents a URL-scraping webhook tailored to the League of Legends site using Discord's endpoint URL.
+
+    Used to post a rich, embedded Discord message built from the source URL's
+    patch notes into the specified Discord channel.
+
+    Attributes
+    ----------
+    bot: commands.Bot
+        The currently running Discord bot. Used for its session.
+    endpoint: str
+        The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
+    source: str
+        The source URL of the content to post.
+    base_url: str
+        The base of the URL. Used to build links found in the HTML.
+    poll_delay: int
+        The downtime between checking for new articles to post.
+    color: int
+        The color of the discord.Embed to post.
+    full_image: bool
+        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
+    footer: tuple
+        The footer text and footer icon of the discord.Embed to post.
+    """
+    def __init__(self, bot, endpoint, **kwargs):
+        super().__init__(bot, endpoint, **kwargs)
+        self.base_url = kwargs.get('base_url')
+
+    async def _build(self, url):
+        soup = await self._fetch(self.source)
+        content = soup.find(class_='views-row views-row-1 views-row-odd views-row-first')
+
+        title = content.find(class_='lol-core-file-formatter').get('title')
+
+        description = content.find(class_='teaser-content').find('div').get_text(strip=True)
+
+        url = f'{self.base_url}{url}'
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            url=url,
+            color=self.color)
+
+        image = content.find(class_='lol-core-file-formatter').find('img').get('src')
+        image = f'{self.base_url}{image}'
+        if self.full_image:
+            embed.set_image(url=image)
+        else:
+            embed.set_thumbnail(url=image)
+
+        text, icon_url = self.footer
+        if text is None:
+            text = ''
+        if icon_url is None:
+            icon_url = ''
+        embed.set_author(name=text, icon_url=icon_url)
         embed.set_footer(text=text, icon_url=icon_url)
 
         return embed
