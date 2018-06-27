@@ -110,6 +110,8 @@ class URLWebhook(RichWebhook):
         The downtime between checking for new articles to post.
     color: int
         The color of the discord.Embed to post.
+    full_size_image: bool
+        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
     footer: tuple
         The footer text and footer icon of the discord.Embed to post.
     """
@@ -119,6 +121,7 @@ class URLWebhook(RichWebhook):
         self.navigate_html = kwargs.get('navigate_html')
         self.poll_delay = kwargs.get('poll_delay')
         self.color = kwargs.get('color', 0x000000)
+        self.full_image = kwargs.get('full_image', False)
         self.footer = kwargs.get('footer', (None, None))
         self.is_running = True
 
@@ -151,9 +154,14 @@ class URLWebhook(RichWebhook):
             color=self.color
         )
 
-        thumbnail = content.find(property='og:image')
-        thumbnail = thumbnail.get('content') if thumbnail else ''
-        embed.set_thumbnail(url=thumbnail)
+        image = content.find(property='og:image')
+        if image:
+            image = image.get('content')
+            if 'share_steam_logo' not in image:
+                if self.full_image:
+                    embed.set_image(url=image)
+                else:
+                    embed.set_thumbnail(url=image)
 
         text, icon_url = self.footer
         if text is None:
@@ -195,6 +203,8 @@ class SteamRSSWebhook(URLWebhook):
         The downtime between checking for new articles to post.
     color: int
         The color of the discord.Embed to post.
+    full_image: bool
+        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
     footer: tuple
         The footer text and footer icon of the discord.Embed to post.
     """
@@ -226,7 +236,10 @@ class SteamRSSWebhook(URLWebhook):
         image = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', image)
         if image:
             image = image.group(1)
-            embed.set_image(url=image)
+            if self.full_image:
+                embed.set_image(url=image)
+            else:
+                embed.set_thumbnail(url=image)
 
         text, icon_url = self.footer
         if text is None:
