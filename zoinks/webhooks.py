@@ -223,8 +223,9 @@ class SteamRSSWebhook(URLWebhook):
             color=self.color)
 
         image = item.find('description').get_text(strip=True)
-        image = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', image).group(1)
+        image = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', image)
         if image:
+            image = image.group(1)
             embed.set_image(url=image)
 
         text, icon_url = self.footer
