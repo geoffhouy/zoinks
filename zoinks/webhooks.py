@@ -3,6 +3,7 @@ import discord
 import asyncio
 import json
 import logging
+import re
 from bs4 import BeautifulSoup
 
 
@@ -174,3 +175,63 @@ class URLWebhook(RichWebhook):
                     await self.post(embed)
                 last_post = post
             await asyncio.sleep(self.poll_delay)
+
+
+class SteamRSSWebhook(URLWebhook):
+    """Represents a Steam RSS, URL-scraping webhook using Discord's endpoint URL.
+
+    Used to post a rich, embedded Discord message built from the source URL's
+    Steam RSS feed into the specified Discord channel.
+
+    Attributes
+    ----------
+    bot: commands.Bot
+        The currently running Discord bot. Used for its session.
+    endpoint: str
+        The Discord webhook endpoint URL. Pass all content after '.../api/webhooks/'.
+    source: str
+        The source URL of the content to post.
+    poll_delay: int
+        The downtime between checking for new articles to post.
+    color: int
+        The color of the discord.Embed to post.
+    footer: tuple
+        The footer text and footer icon of the discord.Embed to post.
+    """
+    def __init__(self, bot, endpoint, **kwargs):
+        super().__init__(bot, endpoint, **kwargs)
+
+    async def _find(self):
+        soup = await self._fetch(self.source)
+        item = soup.select_one('item')
+        return item
+
+    async def _build(self, item):
+        title = item.find('title').get_text(strip=True)
+
+        url = item.find('guid').get_text(strip=True)
+
+        description = item.find('description').get_text(strip=True)
+        description = re.sub('<[^<]+?>', '', description)
+        if len(description) > 250:
+            description = f'{description[:253]}...'
+
+        embed = discord.Embed(
+            title=title,
+            url=url,
+            description=description,
+            color=self.color)
+
+        image = item.find('description').get_text(strip=True)
+        image = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', image).group(1)
+        if image:
+            embed.set_image(url=image)
+
+        text, icon_url = self.footer
+        if text is None:
+            text = 'Untitled'
+        if icon_url is None:
+            icon_url = ''
+        embed.set_footer(text=text, icon_url=icon_url)
+
+        return embed
