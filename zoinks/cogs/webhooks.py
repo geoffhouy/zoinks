@@ -10,7 +10,9 @@ endpoint = '457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBU
 
 webhook_config = {
     'realm_royale': {
-        'name': ('realm royale', 'realm', 'rr'),
+        'name': 'Realm Royale',
+        'tag': ('realm royale', 'realm', 'rr'),
+        'emoji': '🎮',
         'class': URLWebhook,
         'kwargs': {
             'source': 'https://store.steampowered.com/news/?appids=813820', #'https://steamcommunity.com/games/813820/rss/',
@@ -22,7 +24,9 @@ webhook_config = {
         }
     },
     'league_of_legends': {
-        'name': ('league of legends', 'league', 'lol'),
+        'name': 'League of Legends',
+        'tag': ('league of legends', 'league', 'lol'),
+        'emoji': '🎮',
         'class': URLWebhook,
         'kwargs': {
             'source': 'https://na.leagueoflegends.com/en/news/game-updates/patch',
@@ -47,12 +51,6 @@ class Webhooks:
 
     def __init__(self, bot):
         self.bot = bot
-
-        for slot in self.__slots__:
-            if slot == 'bot':
-                continue
-            setattr(self, slot, None)
-
         self._init_webhooks()
         logger.info(f'{self.__class__.__name__} loaded')
 
@@ -64,6 +62,32 @@ class Webhooks:
             kwargs = webhook_config[slot]['kwargs']
             setattr(self, slot, cls(self.bot, endpoint, **kwargs))
             self.bot.loop.create_task(getattr(self, slot).poll())
+
+    @commands.has_permissions(administrator=True)
+    @commands.command(name='status', pass_context=True)
+    async def status(self, ctx):
+        """Displays a list of names and statuses for all existing URL webhooks."""
+        embed = discord.Embed(title='Webhook Status',
+                              description='Each URL webhook and its status is listed below.'
+                                          'To change the status of a webhook, use the `toggle` command.',
+                              color=0x519D6A)
+        field1 = ''
+        field2 = ''
+
+        for slot in self.__slots__:
+            if slot == 'bot':
+                continue
+            cls = getattr(self, slot)
+            if hasattr(cls, 'is_running'):
+                emoji = webhook_config[slot]['emoji']
+                name = webhook_config[slot]['name']
+                field1 += f'{emoji} {name}\n'
+                field2 += '✅\n' if cls.is_running else '❎\n'
+
+        embed.add_field(name='Name', value=field1, inline=True)
+        embed.add_field(name='Status', value=field2, inline=True)
+
+        await self.bot.send_message(ctx.message.channel, embed=embed)
 
 
 def setup(bot):
