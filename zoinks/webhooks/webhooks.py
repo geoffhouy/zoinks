@@ -32,7 +32,7 @@ class Webhook:
     BASE_URL = 'https://discordapp.com/api/webhooks/'
 
     def __init__(self, bot: ZOINKS, endpoint: str, **kwargs):
-        self.session = bot.session
+        self.bot = bot
 
         if self.BASE_URL not in endpoint:
             self.endpoint = f'{self.BASE_URL}{endpoint}'
@@ -60,7 +60,7 @@ class Webhook:
         if self.avatar_url:
             payload['avatar_url'] = self.avatar_url
 
-        async with self.session.post(url=self.endpoint,
+        async with self.bot.session.post(url=self.endpoint,
                                      data=json.dumps(payload, indent=4),
                                      headers={'Content-Type': 'application/json'}) as response:
             if response.status >= 400:
