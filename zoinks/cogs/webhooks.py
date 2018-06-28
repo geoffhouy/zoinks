@@ -18,8 +18,7 @@ webhook_config = {
             'source': 'https://steamcommunity.com/games/262060/rss/',
             'poll_delay': 60 * 60 * 24,  # 1 day
             'color': 0xFB3512,
-            'footer': ('Darkest Dungeon',
-                       'https://steamcdn-a.akamaihd.net/steam/apps/262060/header.jpg')
+            'thumbnail': 'https://steamcdn-a.akamaihd.net/steam/apps/262060/header.jpg'
         }
     },
     'dota2': {
@@ -32,8 +31,7 @@ webhook_config = {
             'navigate_html': lambda soup: soup.find(class_='newsPostBlock steam_updates').find('a').get('href'),
             'poll_delay': 60 * 60 * 24,  # 1 day
             'color': 0xFB3512,
-            'footer': ('Dota2',
-                       'https://steamcdn-a.akamaihd.net/steam/apps/570/capsule_184x69.jpg')
+            'thumbnail': 'https://steamcdn-a.akamaihd.net/steam/apps/570/capsule_184x69.jpg'
         }
     },
     'league_of_legends': {
@@ -49,8 +47,7 @@ webhook_config = {
                 class_='lol-core-file-formatter').get('href'),
             'poll_delay': 60 * 60 * 24,  # 1 day
             'color': 0x96692A,
-            'footer': ('League of Legends',
-                       'https://cdn.leagueoflegends.com/riotbar/prod/1.6.154/images/navigation/icon-game-lol.png')
+            'thumbnail': 'https://i.imgur.com/FaQI0Mw.png'
         }
     },
     'realm_royale': {
@@ -62,9 +59,7 @@ webhook_config = {
             'source': 'https://steamcommunity.com/games/813820/rss/',
             'poll_delay': 60 * 60 * 24,  # 1 day
             'color': 0x9D69F4,
-            'full_image': True,
-            'footer': ('Realm Royale',
-                       'https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg')
+            'thumbnail': 'https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg'
         }
     }
 }
@@ -115,6 +110,12 @@ class Webhooks:
         embed.add_field(name='Status', value=field2, inline=True)
 
         await ctx.send(embed=embed)
+
+    @commands.has_permissions(administrator=True)
+    @commands.command(name='toggle')
+    async def toggle(self, ctx):
+        """Toggles an existing URL webhook."""
+        await ctx.send('test')
 
 
 def setup(bot):
