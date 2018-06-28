@@ -7,9 +7,6 @@ import re
 from bs4 import BeautifulSoup
 
 
-get_headers = {'User-Agent': 'Mozilla/5.0'}
-post_headers = {'Content-Type': 'application/json'}
-
 logger = logging.getLogger(__name__)
 
 
@@ -45,8 +42,8 @@ class Webhook:
             post_content = content
         payload = {'content': post_content}
         async with self.bot.session.post(url=self.endpoint,
-                                     data=payload,
-                                     headers=post_headers) as response:
+                                         data=payload,
+                                         headers={'Content-Type': 'application/json'}) as response:
             print(response)
 
 
@@ -82,8 +79,8 @@ class RichWebhook(Webhook):
         title = post_embed.get('title')
         payload = {'embeds': [post_embed]}
         async with self.bot.session.post(url=self.endpoint,
-                                     data=json.dumps(payload, indent=4),
-                                     headers=post_headers) as response:
+                                         data=json.dumps(payload, indent=4),
+                                         headers={'Content-Type': 'application/json'}) as response:
             if response.status == 400:
                 logger.info(f'Failed to POST {title}: {response.status}')
             else:
@@ -110,10 +107,8 @@ class URLWebhook(RichWebhook):
         The downtime between checking for new articles to post.
     color: int
         The color of the discord.Embed to post.
-    full_size_image: bool
-        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
-    footer: tuple
-        The footer text and footer icon of the discord.Embed to post.
+    thumbnail: str
+        The image URL of the discord.Embed thumbnail to post.
     """
     def __init__(self, bot, endpoint, **kwargs):
         super().__init__(bot, endpoint, **kwargs)
@@ -121,12 +116,11 @@ class URLWebhook(RichWebhook):
         self.navigate_html = kwargs.get('navigate_html')
         self.poll_delay = kwargs.get('poll_delay')
         self.color = kwargs.get('color', 0x000000)
-        self.full_image = kwargs.get('full_image', False)
-        self.footer = kwargs.get('footer', (None, None))
+        self.thumbnail = kwargs.get('thumbnail', None)
         self.is_running = True
 
     async def _fetch(self, url):
-        async with self.bot.session.get(url=url, headers=get_headers) as response:
+        async with self.bot.session.get(url=url, headers={'User-Agent': 'Mozilla/5.0'}) as response:
             content = await response.text()
             soup = BeautifulSoup(content, 'html.parser')
             return soup
@@ -137,15 +131,17 @@ class URLWebhook(RichWebhook):
         return url
 
     async def _build(self, url):
-        content = await self._fetch(url)
+        soup = await self._fetch(url)
 
-        title = content.find(property='og:title')
-        title = title.get('content') if title else ''
+        title = soup.find(property='og:title')
+        if title:
+            title = title.get('content')
 
-        description = content.find(property='og:description')
-        description = description.get('content') if description else ''
-        if len(description) > 250:
-            description = f'{description[:253]}...'
+        description = soup.find(property='og:description')
+        if description:
+            description = description.get('content')
+            if len(description) > 250:
+                description = f'{description[:247]}...'
 
         embed = discord.Embed(
             title=title,
@@ -153,34 +149,27 @@ class URLWebhook(RichWebhook):
             url=url,
             color=self.color)
 
-        image = content.find(property='og:image')
+        image = soup.find(property='og:image')
         if image:
             image = image.get('content')
             if 'share_steam_logo' not in image:
-                if self.full_image:
-                    embed.set_image(url=image)
-                else:
-                    embed.set_thumbnail(url=image)
+                embed.set_image(url=image)
 
-        text, icon_url = self.footer
-        if text is None:
-            text = ''
-        if icon_url is None:
-            icon_url = ''
-        embed.set_footer(text=text, icon_url=icon_url)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
 
         return embed
 
     async def poll(self):
         await self.bot.wait_until_ready()
-        last_post = ''
+        previous_content = ''
         while self.is_running:
-            post = await self._find()
-            if post and post != last_post:
-                embed = await self._build(post)
+            content = await self._find()
+            if content and content != previous_content:
+                embed = await self._build(content)
                 if embed:
                     await self.post(embed)
-                last_post = post
+                previous_content = content
             await asyncio.sleep(self.poll_delay)
 
 
@@ -202,10 +191,8 @@ class SteamRSSWebhook(URLWebhook):
         The downtime between checking for new articles to post.
     color: int
         The color of the discord.Embed to post.
-    full_image: bool
-        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
-    footer: tuple
-        The footer text and footer icon of the discord.Embed to post.
+    thumbnail: str
+        The image URL of the discord.Embed thumbnail to post.
     """
     def __init__(self, bot, endpoint, **kwargs):
         super().__init__(bot, endpoint, **kwargs)
@@ -235,17 +222,10 @@ class SteamRSSWebhook(URLWebhook):
         image = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', image)
         if image:
             image = image.group(1)
-            if self.full_image:
-                embed.set_image(url=image)
-            else:
-                embed.set_thumbnail(url=image)
+            embed.set_image(url=image)
 
-        text, icon_url = self.footer
-        if text is None:
-            text = 'Untitled'
-        if icon_url is None:
-            icon_url = ''
-        embed.set_footer(text=text, icon_url=icon_url)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
 
         return embed
 
@@ -270,10 +250,8 @@ class LeagueOfLegendsWebhook(URLWebhook):
         The downtime between checking for new articles to post.
     color: int
         The color of the discord.Embed to post.
-    full_image: bool
-        The image size within the discord.Embed to post. True for full image size, False for thumbnail size.
-    footer: tuple
-        The footer text and footer icon of the discord.Embed to post.
+    thumbnail: str
+        The image URL of the discord.Embed thumbnail to post.
     """
     def __init__(self, bot, endpoint, **kwargs):
         super().__init__(bot, endpoint, **kwargs)
@@ -297,17 +275,9 @@ class LeagueOfLegendsWebhook(URLWebhook):
 
         image = content.find(class_='lol-core-file-formatter').find('img').get('src')
         image = f'{self.base_url}{image}'
-        if self.full_image:
-            embed.set_image(url=image)
-        else:
-            embed.set_thumbnail(url=image)
+        embed.set_image(url=image)
 
-        text, icon_url = self.footer
-        if text is None:
-            text = ''
-        if icon_url is None:
-            icon_url = ''
-        embed.set_author(name=text, icon_url=icon_url)
-        embed.set_footer(text=text, icon_url=icon_url)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
 
         return embed
