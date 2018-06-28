@@ -13,4 +13,4 @@ if __name__ == '__main__':
         level=logging.INFO,
         stream=sys.stdout)
     bot = ZOINKS()
-    bot.run(config.DISCORD_TOKEN)
+    bot.run(config.DISCORD_TOKEN, reconnect=True)

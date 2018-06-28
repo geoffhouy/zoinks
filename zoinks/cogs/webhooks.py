@@ -91,7 +91,7 @@ class Webhooks:
             self.bot.loop.create_task(getattr(self, slot).poll())
 
     @commands.has_permissions(administrator=True)
-    @commands.command(name='status', pass_context=True)
+    @commands.command(name='status')
     async def status(self, ctx):
         """Displays a list of names and statuses for all existing URL webhooks."""
         embed = discord.Embed(title='Webhook Status',
@@ -114,7 +114,7 @@ class Webhooks:
         embed.add_field(name='Name', value=field1, inline=True)
         embed.add_field(name='Status', value=field2, inline=True)
 
-        await self.bot.send_message(ctx.message.channel, embed=embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

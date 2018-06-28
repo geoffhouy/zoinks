@@ -15,7 +15,7 @@ extensions = ('zoinks.cogs.webhooks',
 logger = logging.getLogger(__name__)
 
 
-class ZOINKS(commands.Bot):
+class ZOINKS(commands.AutoShardedBot):
 
     def __init__(self):
         super().__init__(
