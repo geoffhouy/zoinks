@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class LOLWebhook(ScrapingWebhook):
+class LoLWebhook(ScrapingWebhook):
     """Represents a URL-scraping webhook using Discord's endpoint URL.
 
     Specifically used to scrape the League of Legends homepage for new patch notes then build and post a rich
