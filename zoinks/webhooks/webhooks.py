@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Webhook:
-    """Represents a basic webhook using Discord's endpoint URL.
+    """Represents a basic webhook that outputs to the specified Discord endpoint URL.
 
     Used to post a plain text message, a rich discord.Embed message, or a combination of the two
     into the specified Discord channel.
@@ -70,7 +70,7 @@ class Webhook:
 
 
 class ScrapingWebhook(Webhook):
-    """Represents a URL-scraping webhook using Discord's endpoint URL.
+    """Represents a URL-scraping webhook that outputs to the specified Discord endpoint URL.
 
     Used to scrape the specified URL then build and post a rich discord.Embed message
     into the specified Discord channel.
@@ -170,4 +170,3 @@ class ScrapingWebhook(Webhook):
                     await self.post(embed=embed)
                 prev_url = url
             await asyncio.sleep(self.delay)
-
