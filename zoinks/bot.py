@@ -23,11 +23,14 @@ class ZOINKS(commands.AutoShardedBot):
             description=description,
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
+        self._load_extensions()
+
+    def _load_extensions(self):
         for extension in extensions:
             try:
                 self.load_extension(extension)
             except ModuleNotFoundError as e:
-                logger.warning(f'{e}')
+                logger.warning(e)
 
     async def close(self):
         await super().close()
