@@ -22,7 +22,7 @@ class Webhook:
     ----------
     bot: ZOINKS
         The currently running ZOINKS Discord bot. Used for its session attribute.
-    endpoint: str
+    endpoint_url: str
         The Discord webhook endpoint URL. Pass either the entire URL or all content after '/webhooks/'.
     username: str
         The Discord webhook username. Used to override the current webhook name.
@@ -31,13 +31,13 @@ class Webhook:
     """
     BASE_URL = 'https://discordapp.com/api/webhooks/'
 
-    def __init__(self, bot: ZOINKS, endpoint: str, **kwargs):
+    def __init__(self, bot: ZOINKS, endpoint_url: str, **kwargs):
         self.bot = bot
 
-        if self.BASE_URL not in endpoint:
-            self.endpoint = f'{self.BASE_URL}{endpoint}'
+        if self.BASE_URL not in endpoint_url:
+            self.endpoint_url = f'{self.BASE_URL}{endpoint_url}'
         else:
-            self.endpoint = endpoint
+            self.endpoint_url = endpoint_url
 
         self.username = kwargs.get('username')
         self.avatar_url = kwargs.get('avatar_url')
@@ -60,9 +60,9 @@ class Webhook:
         if self.avatar_url:
             payload['avatar_url'] = self.avatar_url
 
-        async with self.bot.session.post(url=self.endpoint,
-                                     data=json.dumps(payload, indent=4),
-                                     headers={'Content-Type': 'application/json'}) as response:
+        async with self.bot.session.post(url=self.endpoint_url,
+                                         data=json.dumps(payload, indent=4),
+                                         headers={'Content-Type': 'application/json'}) as response:
             if response.status >= 400:
                 logger.info(f'Failed to POST: {response.status}')
             else:
