@@ -97,7 +97,7 @@ class ScrapingWebhook(Webhook):
         The thumbnail URL of the discord.Embed to post. Typically used for logos.
     """
     def __init__(self, bot: ZOINKS, endpoint_url: str, **kwargs):
-        super().__init__(bot, endpoint_url, **kwargs)
+        super().__init__(bot=bot, endpoint_url=endpoint_url, **kwargs)
 
         self.source_url = kwargs.get('source_url')
         if self.source_url is None:
