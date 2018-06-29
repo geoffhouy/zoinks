@@ -2,8 +2,10 @@ from zoinks.bot import ZOINKS
 
 import discord
 
+import asyncio
 import json
 import logging
+from bs4 import BeautifulSoup
 
 
 logger = logging.getLogger(__name__)
@@ -48,12 +50,10 @@ class Webhook:
         if content:
             payload['content'] = content
         if embed:
-            payload['embeds'] = [embed]
+            payload['embeds'] = [embed.to_dict()]
 
         if not payload:
-            raise ValueError('No information received to create payload')
-
-        title = embed.get('title')
+            raise ValueError('Payload must have either content, an embed, or both')
 
         if self.username:
             payload['username'] = self.username
@@ -66,5 +66,108 @@ class Webhook:
             if response.status >= 400:
                 logger.info(f'Failed to POST: {response.status}')
             else:
-                logger.info(f'POST "{title}"')
+                logger.info(f'POST "{embed.title}"')
+
+
+class ScrapingWebhook(Webhook):
+    """Represents a URL-scraping webhook using Discord's endpoint URL.
+
+    Used to scrape the specified URL then build and post a rich discord.Embed message
+    into the specified Discord channel.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot. Used for its session attribute.
+    endpoint_url: str
+        The Discord webhook endpoint URL. Pass either the entire URL or all content after '/webhooks/'.
+    username: str
+        The Discord webhook username. Used to override the current webhook name.
+    avatar_url: str
+        The Discord webhook avatar image URL. Used to override the current webhook image.
+    source_url: str
+        The source URL of the content to post.
+    navigate_html: function
+        The BeautifulSoup function chain to find the URL of the latest article from the source URL.
+    delay: int
+        The time in seconds between checking for new content to post.
+    color: int
+        The color of the discord.Embed to post. Typically matched with the homepage color scheme.
+    thumbnail_url: str
+        The thumbnail URL of the discord.Embed to post. Typically used for logos.
+    """
+    def __init__(self, bot: ZOINKS, endpoint_url: str, **kwargs):
+        super().__init__(bot, endpoint_url, **kwargs)
+
+        self.source_url = kwargs.get('source_url')
+        if self.source_url is None:
+            raise ValueError('Source URL must be set')
+
+        self.navigate_html = kwargs.get('navigate_html')
+        self.delay = kwargs.get('delay', 60 * 60 * 24)
+        self.color = kwargs.get('color', 0xFFFFFF)
+        self.thumbnail_url = kwargs.get('thumbnail_url')
+
+        self.is_running = True
+
+    async def fetch_soup(self, url):
+        async with self.bot.session.get(url=url, headers={'User-Agent': 'Mozilla/5.0'}) as response:
+            if response.status >= 400:
+                logger.info(f'Failed to GET: {response.status}')
+                return None
+            else:
+                content = await response.text()
+                return BeautifulSoup(content, 'html.parser')
+
+    async def find_url(self):
+        soup = await self.fetch_soup(self.source_url)
+        try:
+            url = self.navigate_html(soup)
+        except AttributeError as e:
+            logger.warning(e)
+            return None
+        else:
+            return url
+
+    async def build_embed(self, url):
+        soup = await self.fetch_soup(url)
+
+        title = soup.find(property='og:title')
+        if title:
+            title = title.get('content')
+
+        description = soup.find(property='og:description')
+        if description:
+            description = description.get('content')
+            if len(description) > 250:
+                description = f'{description[:247]}...'
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            url=url,
+            color=self.color)
+
+        image_url = soup.find(property='og:image')
+        if image_url:
+            image_url = image_url.get('content')
+            if 'share_steam_logo' not in image_url:
+                embed.set_image(url=image_url)
+
+        if self.thumbnail_url:
+            embed.set_thumbnail(url=self.thumbnail_url)
+
+        return embed
+
+    async def poll(self):
+        await self.bot.wait_until_ready()
+        prev_url = ''
+        while self.is_running:
+            url = await self.find_url()
+            if url and url != prev_url:
+                embed = await self.build_embed(url)
+                if embed:
+                    await self.post(embed=embed)
+                prev_url = url
+            await asyncio.sleep(self.delay)
 
