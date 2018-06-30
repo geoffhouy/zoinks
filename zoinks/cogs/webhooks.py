@@ -1,4 +1,7 @@
-from zoinks.webhooks import LeagueOfLegendsWebhook, SteamRSSWebhook, URLWebhook
+import config
+from zoinks.webhooks.lol_webhook import LoLWebhook
+from zoinks.webhooks.steam_webhook import SteamWebhook
+from zoinks.webhooks.webhooks import ScrapingWebhook
 
 import discord
 from discord.ext import commands
@@ -6,14 +9,12 @@ from discord.ext import commands
 import logging
 
 
-endpoint = '457588791062822912/CY8BuF3M8r944g-y4-3svTTI-GOEc9LIACCMnrWkaz-tJAwBURuFpabGUzusUzdsT2Fi'
-
 webhook_config = {
     'darkest_dungeon': {
         'name': 'Darkest Dungeon',
         'tag': ('darkest dungeon', 'darkest', 'dd'),
         'emoji': '🎮',
-        'class': SteamRSSWebhook,
+        'class': SteamWebhook,
         'kwargs': {
             'source': 'https://steamcommunity.com/games/262060/rss/',
             'poll_delay': 60 * 60 * 24,  # 1 day
@@ -82,10 +83,10 @@ class Webhooks:
                 continue
             cls = webhook_config[slot]['class']
             kwargs = webhook_config[slot]['kwargs']
-            setattr(self, slot, cls(self.bot, endpoint, **kwargs))
+            setattr(self, slot, cls(self.bot, config.DISCORD_WEBHOOK_URL, **kwargs))
             self.bot.loop.create_task(getattr(self, slot).poll())
 
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_webhooks=True)
     @commands.command(name='status')
     async def status(self, ctx):
         """Displays a list of names and statuses for all existing URL webhooks."""
@@ -111,7 +112,7 @@ class Webhooks:
 
         await ctx.send(embed=embed)
 
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_webhooks=True)
     @commands.command(name='toggle')
     async def toggle(self, ctx):
         """Toggles an existing URL webhook."""
