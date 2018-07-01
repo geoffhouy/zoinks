@@ -8,10 +8,10 @@ import logging
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
-extensions = ('zoinks.cogs.join',
+extensions = ('zoinks.cogs.join',)
               #'zoinks.cogs.webhooks',
-              'zoinks.cogs.league_of_legends',
-              'zoinks.cogs.realm_royale')
+              #'zoinks.cogs.league_of_legends',
+              #'zoinks.cogs.realm_royale')
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class ZOINKS(commands.AutoShardedBot):
 
     async def on_ready(self):
         await self.change_presence(game=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
-        logger.info(f'{self.user} ({self.user.id}) logged in')
+        logger.info(f'{self.user} logged in')
 
     async def on_message(self, message):
         if message.author.bot:
