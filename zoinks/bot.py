@@ -8,7 +8,8 @@ import logging
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
-extensions = ('zoinks.cogs.webhooks',
+extensions = ('zoinks.cogs.join',
+              #'zoinks.cogs.webhooks',
               'zoinks.cogs.league_of_legends',
               'zoinks.cogs.realm_royale')
 
