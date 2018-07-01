@@ -45,8 +45,20 @@ class ZOINKS(commands.AutoShardedBot):
             return
         await self.process_commands(message)
 
-    async def on_command_error(self, error, ctx):
-        if isinstance(error, commands.errors.CommandNotFound):
-            pass
-        elif isinstance(error, commands.errors.MissingRequiredArgument):
-            pass
+    async def on_command_error(self, ctx, error):
+        if hasattr(ctx.command, 'on_error'):
+            return
+
+        error = getattr(error, 'original', error)
+
+        ignored = (commands.errors.CommandNotFound, commands.errors.DisabledCommand)
+        if isinstance(error, ignored):
+            return
+
+        ignored = (commands.errors.UserInputError, commands.errors.MissingRequiredArgument,
+                   commands.errors.TooManyArguments)
+        if isinstance(error, ignored):
+            # send help for specific command
+            return
+
+        logger.info(f'Ignoring on_command_error: {error}')
