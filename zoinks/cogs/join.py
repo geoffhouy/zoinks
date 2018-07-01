@@ -10,10 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def not_verified(ctx):
-    return (ctx.guild and
-            ctx.guild == Join.guild and
-            ctx.message.channel == Join.channel and
-            Join.role in ctx.author.roles)
+    return ctx.guild and ctx.guild == Join.guild and ctx.message.channel == Join.channel
 
 
 class Join:
@@ -49,11 +46,12 @@ class Join:
             logger.info(f'{member} joined')
 
     @commands.command(name='verify', hidden=True)
+    @commands.has_role(name='Guest')
     @commands.check(not_verified)
     async def verify(self, ctx):
         await ctx.author.remove_roles(self.role)
         await ctx.message.delete()
-        logger.info(f'{ctx.author} verified themselves')
+        logger.info(f'{ctx.author} verified')
 
 
 def setup(bot):
