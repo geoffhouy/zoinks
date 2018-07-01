@@ -170,3 +170,7 @@ class ScrapingWebhook(Webhook):
                     await self.post(embed=embed)
                 prev_url = url
             await asyncio.sleep(self.delay)
+
+    @classmethod
+    def from_string(cls, bot, name):
+        raise NotImplementedError
