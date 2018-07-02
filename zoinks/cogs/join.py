@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 async def _not_verified(ctx):
-    return ctx.guild and ctx.guild == Join.guild and ctx.message.channel == Join.channel
+    return ctx.guild and ctx.guild == NewMember.guild and ctx.message.channel == NewMember.channel
 
 
-class Join:
+class NewMember:
 
     guild = None
     channel = None
@@ -53,4 +53,4 @@ class Join:
 
 
 def setup(bot):
-    bot.add_cog(Join(bot))
+    bot.add_cog(NewMember(bot))
