@@ -38,7 +38,7 @@ class ZOINKS(commands.AutoShardedBot):
         await self.session.close()
 
     async def on_ready(self):
-        await self.change_presence(game=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
+        await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
         logger.info(f'{self.user} logged in')
 
     async def on_message(self, message):
