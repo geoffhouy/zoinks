@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def _not_verified(ctx):
+async def _in_correct_channel(ctx):
     return ctx.guild and ctx.guild == NewMember.guild and ctx.message.channel == NewMember.channel
 
 
@@ -45,7 +45,7 @@ class NewMember:
 
     @commands.command(name='verify', hidden=True)
     @commands.has_role(name='Guest')
-    @commands.check(_not_verified)
+    @commands.check(_in_correct_channel)
     async def verify(self, ctx):
         await ctx.author.remove_roles(self.role)
         await ctx.message.delete()
