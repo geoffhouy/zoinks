@@ -38,7 +38,7 @@ def setup(bot):
 async def _send_pin_message(channel, message, reaction):
     embed = discord.Embed(description=message.content, color=0x4D9C5F, timestamp=message.created_at)
     embed.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-    embed.set_footer(text=f'Pinned with {reaction.count} {reaction.emoji}')
+    embed.set_footer(text=f'Auto-pinned with {reaction.count} {reaction.emoji}')
     if message.embeds:
         embed.set_image(url=message.embeds[0].url)
     await channel.send(embed=embed)
