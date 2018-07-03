@@ -9,7 +9,8 @@ command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
 extensions = ('zoinks.cogs.new_member',
-              'zoinks.cogs.pin_popular')
+              'zoinks.cogs.pin_popular',
+              'zoinks.cogs.twitch_notifier')
               #'zoinks.cogs.webhooks',
               #'zoinks.cogs.league_of_legends',
               #'zoinks.cogs.realm_royale')
