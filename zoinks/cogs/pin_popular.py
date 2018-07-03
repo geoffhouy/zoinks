@@ -25,7 +25,7 @@ class PinPopular:
                     if not message.pinned:
                         reaction = next((reaction for reaction in message.reactions
                                          if reaction.count >= self.pin_threshold), None)
-                        if reaction:
+                        if reaction is not None:
                             await message.pin()
                             await _send_pin_message(channel, message, reaction)
                             logger.info(f'Message by {message.author} pinned')
