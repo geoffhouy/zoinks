@@ -22,7 +22,7 @@ class ZOINKS(commands.AutoShardedBot):
 
     def __init__(self):
         super().__init__(
-            command_prefix=commands.when_mentioned_or(command_prefix),
+            command_prefix=command_prefix,
             description=description,
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
