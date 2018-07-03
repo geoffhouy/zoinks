@@ -31,16 +31,13 @@ class NewMember:
     async def on_member_join(self, member):
         if member.guild == self.__class__.guild:
             await member.add_roles(self.__class__.role)
-            await member.send(embed=discord.Embed(title='👋 Welcome',
-                                                  description=f'Like, welcome to {self.__class__.guild}!\n\n'
-                                                              'Please remember to read over '
-                                                              f'{self.__class__.channel.mention} to familiarize '
-                                                              'yourself with what\'s allowed in '
-                                                              f'{self.__class__.guild}.\n\n'
-                                                              'If you have any comments, questions, or concerns, '
-                                                              'please contact an Administrator or a Moderator.\n\n'
-                                                              'Enjoy your stay!',
-                                                  color=0x4D9C5F))
+            await member.send(embed=discord.Embed(
+                title='👋 Welcome',
+                description=f'Like, welcome to {self.__class__.guild}!\n\nPlease remember to read over '
+                            f'{self.__class__.channel.mention} to familiarize yourself with what\'s allowed in '
+                            f'{self.__class__.guild}.\n\n If you have any comments, questions, or concerns, '
+                            'please contact an Administrator or a Moderator.\n\nEnjoy your stay!',
+                color=0x4D9C5F))
             logger.info(f'{member} joined')
 
     @commands.command(name='verify', hidden=True)
