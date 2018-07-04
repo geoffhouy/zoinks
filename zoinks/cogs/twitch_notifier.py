@@ -14,7 +14,8 @@ class TwitchNotifier:
 
     async def on_member_update(self, before, after):
         if after.guild == self.bot.guild:
-            if (after.activity
+            if ('content creator' in [role.name.lower() for role in after.roles]
+                    and after.activity
                     and isinstance(after.activity, discord.Streaming)
                     and after.activity.twitch_name is not None
                     and not isinstance(before.activity, discord.Streaming)):
@@ -29,12 +30,10 @@ def setup(bot):
 async def _send_notification_message(channel, member):
     embed = discord.Embed(
         title=member.activity.name,
-        description=f'I\'m streaming {member.activity.details}!',
+        description=f'Playing {member.activity.details}',
         url=f'https://www.twitch.tv/{member.activity.twitch_name}',
-        color=0x4D9C5F)
-    embed.set_author(name=member.display_name, icon_url=member.avatar_url)
-    embed.set_footer(text='Live on Twitch')
-
-    message = await channel.send('@everyone', embed=embed)
-    embed.timestamp = message.created_at
-    await message.edit(content=None, embed=embed)
+        color=0x6441A4)
+    embed.set_author(name=member.activity.twitch_name,
+                     url=f'https://www.twitch.tv/{member.activity.twitch_name}',
+                     icon_url=member.avatar_url)
+    await channel.send(f'Hey @everyone, {member.mention} is now live on Twitch!', embed=embed)
