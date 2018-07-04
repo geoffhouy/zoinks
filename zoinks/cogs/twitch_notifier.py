@@ -18,8 +18,7 @@ class TwitchNotifier:
                     and isinstance(after.activity, discord.Streaming)
                     and after.activity.twitch_name is not None
                     and not isinstance(before.activity, discord.Streaming)):
-                channel = self.bot.get_channel(self.bot.notification_channel)
-                await _send_notification_message(channel, after)
+                await _send_notification_message(self.bot.notification_channel, after)
                 logger.info(f'Live notification displayed for {after}')
 
 
