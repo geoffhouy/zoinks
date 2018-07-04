@@ -1,5 +1,3 @@
-import config
-
 import discord
 
 import logging
