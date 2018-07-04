@@ -13,12 +13,11 @@ class PinPopular:
     def __init__(self, bot):
         self.bot = bot
         self.pin_threshold = 10
-        self.disabled_channels = (462996078430781441, 462996375794221066, 462996408216059914, 462996435839877130)
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_raw_reaction_add(self, payload):
-        if payload.guild_id == config.COOLSVILLE_GUILD_ID:
-            if payload.channel_id not in self.disabled_channels:
+        if payload.guild_id == self.bot.guild.id:
+            if payload.channel_id not in self.bot.pin_disabled_channels:
                 channel = self.bot.get_channel(payload.channel_id)
                 if len(await channel.pins()) < 50:
                     message = await channel.get_message(payload.message_id)

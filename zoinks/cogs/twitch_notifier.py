@@ -12,16 +12,15 @@ class TwitchNotifier:
 
     def __init__(self, bot):
         self.bot = bot
-        self.notification_channel = 462996435839877130
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_member_update(self, before, after):
-        if after.guild.id == config.COOLSVILLE_GUILD_ID:
+        if after.guild == self.bot.guild:
             if (after.activity
                     and isinstance(after.activity, discord.Streaming)
                     and after.activity.twitch_name is not None
                     and not isinstance(before.activity, discord.Streaming)):
-                channel = self.bot.get_channel(self.notification_channel)
+                channel = self.bot.get_channel(self.bot.notification_channel)
                 await _send_notification_message(channel, after)
                 logger.info(f'Live notification displayed for {after}')
 

@@ -1,5 +1,3 @@
-import config
-
 import discord
 
 import logging
@@ -12,19 +10,16 @@ class YouTubeNotifier:
 
     def __init__(self, bot):
         self.bot = bot
-        self.notification_channel = 462996435839877130
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_message(self, message):
         if isinstance(message.channel, discord.DMChannel):
-            guild = self.bot.get_guild(config.COOLSVILLE_GUILD_ID)
-            member = guild.get_member(message.author.id)
+            member = self.bot.guild.get_member(message.author.id)
             if member and 'content creator' in [role.name.lower() for role in member.roles]:
                 if 'youtube' in message.content or 'youtu.be' in message.content and message.embeds:
-                    channel = self.bot.get_channel(self.notification_channel)
+                    channel = self.bot.get_channel(self.bot.notification_channel)
                     await _send_notification_message(channel, message)
                     logger.info(f'YouTube notification displayed for {message.author.display_name}')
-        await self.bot.process_commands(message)
 
 
 def setup(bot):
