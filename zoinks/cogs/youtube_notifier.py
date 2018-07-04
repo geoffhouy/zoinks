@@ -17,8 +17,7 @@ class YouTubeNotifier:
             member = self.bot.guild.get_member(message.author.id)
             if member and 'content creator' in [role.name.lower() for role in member.roles]:
                 if 'youtube' in message.content or 'youtu.be' in message.content and message.embeds:
-                    channel = self.bot.get_channel(self.bot.notification_channel)
-                    await _send_notification_message(channel, message)
+                    await _send_notification_message(self.bot.notification_channel, message)
                     logger.info(f'YouTube notification displayed for {message.author.display_name}')
 
 
