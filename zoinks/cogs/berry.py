@@ -9,15 +9,30 @@ logger = logging.getLogger(__name__)
 file_dir = 'zoinks/data/'
 file_path = os.path.join(file_dir, 'berry.txt')
 
-if not os.path.exists(file_dir):
-    os.makedirs(file_dir)
+
+def _create_file():
     with open(file_path, 'w+') as file:
         file.write(str(0))
         logger.info(f'{file_path} created')
 
 
-class Berry:
+if not os.path.exists(file_dir):
+    os.makedirs(file_dir)
+    _create_file()
 
+
+class Berry:
+    """Represents a cog for a Discord bot.
+
+    This cog extends the default on_message event function.
+    It checks a message containing 'berry' in any valid Discord text channel, then displays
+    a nice message showing the current berry count stored in the file_path above.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot.
+    """
     def __init__(self, bot):
         self.bot = bot
         logger.info(f'{self.__class__.__name__} loaded')
@@ -56,7 +71,7 @@ async def _send_berry_message(message, berry_count):
     grammar = 'berries' if berry_count != 1 else 'berry'
     embed = discord.Embed(
         title='🍓 Thanks',
-        description='Like, thanks for feeding Scoob a berry!\n\n'
+        description='Like, thanks for feeding Scoob!\n\n'
                     f'Scoob has now eaten {berry_count} {grammar}. Berry nice!',
         color=0x4D9C5F)
     embed.set_thumbnail(url='https://media.giphy.com/media/T825g5mLEUqE8/giphy.gif')
