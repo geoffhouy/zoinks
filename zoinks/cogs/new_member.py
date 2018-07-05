@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 async def _in_correct_channel(ctx):
-    return ctx.guild and ctx.guild == NewMember.guild and ctx.message.channel == NewMember.channel
+    return ctx.guild is not None and ctx.guild == NewMember.guild and ctx.message.channel == NewMember.channel
 
 
 class NewMember:
