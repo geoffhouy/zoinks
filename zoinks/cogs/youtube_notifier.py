@@ -14,10 +14,10 @@ class YouTubeNotifier:
 
     async def on_message(self, message):
         if isinstance(message.channel, discord.DMChannel):
-            member = self.bot.guild.get_member(message.author.id)
+            member = self.bot.config.guild.get_member(message.author.id)
             if member and 'content creator' in [role.name.lower() for role in member.roles]:
                 if 'youtube' in message.content or 'youtu.be' in message.content and message.embeds:
-                    await _send_notification_message(self.bot.notification_channel, message)
+                    await _send_notification_message(self.bot.config.notification_channel, message)
                     logger.info(f'YouTube notification displayed for {message.author.display_name}')
 
 

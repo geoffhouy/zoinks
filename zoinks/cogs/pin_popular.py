@@ -14,8 +14,8 @@ class PinPopular:
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_raw_reaction_add(self, payload):
-        if payload.guild_id == self.bot.guild.id:
-            if payload.channel_id not in self.bot.pin_disabled_channels:
+        if payload.guild_id == self.bot.config.guild.id:
+            if payload.channel_id not in self.bot.config.pin_disabled_channels:
                 channel = self.bot.get_channel(payload.channel_id)
                 if len(await channel.pins()) < 50:
                     message = await channel.get_message(payload.message_id)

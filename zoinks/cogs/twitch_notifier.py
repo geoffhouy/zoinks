@@ -13,13 +13,12 @@ class TwitchNotifier:
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_member_update(self, before, after):
-        if after.guild == self.bot.guild:
+        if after.guild == self.bot.config.guild:
             if ('content creator' in [role.name.lower() for role in after.roles]
-                    and after.activity
                     and isinstance(after.activity, discord.Streaming)
                     and after.activity.twitch_name is not None
                     and not isinstance(before.activity, discord.Streaming)):
-                await _send_notification_message(self.bot.notification_channel, after)
+                await _send_notification_message(self.bot.config.notification_channel, after)
                 logger.info(f'Live notification displayed for {after}')
 
 

@@ -22,18 +22,18 @@ class NewMember:
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_ready(self):
-        self.__class__.guild = self.bot.guild
-        self.__class__.channel = self.bot.rules_channel
-        self.__class__.role = discord.utils.get(self.bot.guild.roles, name='Guest')
+        self.__class__.guild = self.bot.config.guild
+        self.__class__.channel = self.bot.config.rules_channel
+        self.__class__.role = discord.utils.get(self.bot.config.guild.roles, name='Guest')
 
     async def on_member_join(self, member):
-        if member.guild == self.bot.guild:
+        if member.guild == self.bot.config.guild:
             await member.add_roles(self.__class__.role)
             await member.send(embed=discord.Embed(
                 title='👋 Welcome',
-                description=f'Like, welcome to {self.bot.guild}!\n\nPlease remember to read over '
-                            f'{self.bot.rules_channel.mention} to familiarize yourself with what\'s allowed in '
-                            f'{self.bot.guild}.\n\n If you have any comments, questions, or concerns, '
+                description=f'Like, welcome to {self.bot.config.guild}!\n\nPlease remember to read over '
+                            f'{self.bot.config.rules_channel.mention} to familiarize yourself with what\'s allowed in '
+                            f'{self.bot.config.guild}.\n\n If you have any comments, questions, or concerns, '
                             'please contact an Administrator or a Moderator.\n\nEnjoy your stay!',
                 color=0x4D9C5F))
             logger.info(f'{member} joined')
