@@ -29,12 +29,7 @@ class ZOINKS(commands.AutoShardedBot):
             description=description,
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
-
-        self.guild = None
-        self.rules_channel = None
-        self.notification_channel = None
-        self.pin_disabled_channels = ()
-
+        self.config = Coolsville()
         self._load_extensions()
 
     def _load_extensions(self):
@@ -44,19 +39,18 @@ class ZOINKS(commands.AutoShardedBot):
             except ModuleNotFoundError as e:
                 logger.warning(e)
 
-    def _set_defaults(self):
-        self.guild = self.get_guild(id=Coolsville.GUILD_ID)
-        self.rules_channel = self.get_channel(id=Coolsville.RULES_CHANNEL_ID)
-        self.notification_channel = self.get_channel(id=Coolsville.NOTIFICATION_CHANNEL_ID)
-        self.pin_disabled_channels = Coolsville.PIN_DISABLED_CHANNELS
-        logger.info(f'Defaults set for {Coolsville.__name__}')
+    def _configure(self):
+        self.config.configure(guild=self.get_guild(id=Coolsville.GUILD_ID),
+                              rules_channel=self.get_channel(id=Coolsville.RULES_CHANNEL_ID),
+                              notifications_channel=self.get_channel(id=Coolsville.NOTIFICATIONS_CHANNEL_ID))
+        logger.info(f'Defaults configured for {Coolsville.__name__}')
 
     async def close(self):
         await super().close()
         await self.session.close()
 
     async def on_ready(self):
-        self._set_defaults()
+        self._configure()
         await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
         logger.info(f'{self.user} logged in')
 
