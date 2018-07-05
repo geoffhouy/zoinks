@@ -7,7 +7,22 @@ logger = logging.getLogger(__name__)
 
 
 class PinPopular:
+    """Represents a cog for a Discord bot.
 
+    This cog extends the default on_raw_reaction_add event function. Note: on_raw_reaction_add does not
+    use the bot's message cache which means old messages can be pinned.
+    It uses Discord's built-in reactions to pin the 'popular' message in its channel
+    on the specified guild.
+
+    *The guild is specified at the time of creation of the bot. See its config attribute.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot.
+    pin_threshold: int
+        The number of same-emoji reactions required for a message to become 'popular'/pinned.
+    """
     def __init__(self, bot):
         self.bot = bot
         self.pin_threshold = 10

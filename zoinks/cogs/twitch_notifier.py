@@ -7,7 +7,19 @@ logger = logging.getLogger(__name__)
 
 
 class TwitchNotifier:
+    """Represents a cog for a Discord bot.
 
+    This cog extends the default on_member_update event function.
+    It uses Discord's built-in activities to notify the specified channel in the specified
+    guild that a Content Creator, a specified role, has gone live on Twitch.*
+
+    *The channel and guild are specified at the time of creation of the bot. See its config attribute.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot.
+    """
     def __init__(self, bot):
         self.bot = bot
         logger.info(f'{self.__class__.__name__} loaded')

@@ -7,7 +7,20 @@ logger = logging.getLogger(__name__)
 
 
 class YouTubeNotifier:
+    """Represents a cog for a Discord bot.
 
+    This cog extends the default on_message event function.
+    It checks its direct message channels for YouTube URLs from a Content Creator, a specified role in
+    a specified guild, then notifies the specified channel in said guild that the message sender
+    has uploaded/shared a new YouTube video.
+
+    *The channel and guild are specified at the time of creation of the bot. See its config attribute.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot.
+    """
     def __init__(self, bot):
         self.bot = bot
         logger.info(f'{self.__class__.__name__} loaded')

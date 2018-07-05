@@ -12,7 +12,27 @@ async def _in_correct_channel(ctx):
 
 
 class NewMember:
+    """Represents a cog for a Discord bot.
 
+    This cog extends the default on_ready event function to set its class variables for usage
+    in the _in_correct_channel verify command check. It must be done this way because
+    the commands.check() will refuse self.
+
+    This cog also extends the default on_member_join event function.
+    It handles the new member experience for the specified guild.*
+    Whenever a new member joins the specified guild, the bot will send him/her a welcoming direct message and
+    give him/her the Guest role**. The Guest role is limited to reading/sending text messages
+    into a single #rules (specified) channel. Once the new member who still has the Guest role
+    types the verify command, the bot will remove the Guest role allowing the new member
+    to have all the permissions of the @everyone role.
+
+    *The channel and guild are specified at the time of creation of the bot. See its config attribute.
+
+    Attributes
+    ----------
+    bot: ZOINKS
+        The currently running ZOINKS Discord bot.
+    """
     guild = None
     channel = None
     role = None
