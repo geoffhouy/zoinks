@@ -6,6 +6,15 @@ import os
 
 logger = logging.getLogger(__name__)
 
+file_dir = 'zoinks/data/'
+file_path = os.path.join(file_dir, 'berry.txt')
+
+if not os.path.exists(file_dir):
+    os.makedirs(file_dir)
+    with open(file_path, 'w+') as file:
+        file.write(str(0))
+        logger.info(f'{file_path} created')
+
 
 class Berry:
 
@@ -35,27 +44,20 @@ def _in_valid_text_channel(bot, message):
 
 
 def _count_berry():
-    file_path = 'zoinks/data/'
-    file_name = 'berry.txt'
-    joined_path = os.path.join(file_path, file_name)
-    if not os.path.exists(file_path):
-        os.makedirs(file_path)
-        with open(joined_path, 'w+') as file:
-            count = 1
-            file.write(str(count))
-    else:
-        with open(joined_path, 'r+') as file:
-            count = int(file.read())
-            file.seek(0)
-            count = count + 1
-            file.write(str(count))
-    return count
+    with open(file_path, 'r+') as file:
+        count = int(file.read())
+        file.seek(0)
+        count = count + 1
+        file.write(str(count))
+        return count
 
 
 async def _send_berry_message(message, berry_count):
+    grammar = 'berries' if berry_count != 1 else 'berry'
     embed = discord.Embed(
         title='🍓 Thanks',
-        description=f'Like, thanks for feeding Scoob a berry!\n\nScoob has now eaten {berry_count}. Berry nice!',
+        description='Like, thanks for feeding Scoob a berry!\n\n'
+                    f'Scoob has now eaten {berry_count} {grammar}. Berry nice!',
         color=0x4D9C5F)
     embed.set_thumbnail(url='https://media.giphy.com/media/T825g5mLEUqE8/giphy.gif')
     await message.channel.send(embed=embed)
