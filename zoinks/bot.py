@@ -1,5 +1,3 @@
-from config import Coolsville
-
 import discord
 from discord.ext import commands
 
@@ -30,14 +28,7 @@ class ZOINKS(commands.AutoShardedBot):
             description=description,
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.config = Coolsville()
         self._load_extensions()
-
-    def _configure(self):
-        self.config.configure(guild=self.get_guild(id=Coolsville.GUILD_ID),
-                              rules_channel=self.get_channel(id=Coolsville.RULES_CHANNEL_ID),
-                              notifications_channel=self.get_channel(id=Coolsville.NOTIFICATIONS_CHANNEL_ID))
-        logger.info(f'Defaults configured for {Coolsville.__name__}')
 
     def _load_extensions(self):
         for extension in extensions:
@@ -51,7 +42,6 @@ class ZOINKS(commands.AutoShardedBot):
         await self.session.close()
 
     async def on_ready(self):
-        self._configure()
         await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
         logger.info(f'{self.user} logged in')
 
