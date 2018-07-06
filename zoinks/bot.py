@@ -10,7 +10,8 @@ import logging
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
-extensions = ('zoinks.cogs.new_member',
+extensions = ('zoinks.cogs.berry',
+              'zoinks.cogs.new_member',
               'zoinks.cogs.pin_popular',
               'zoinks.cogs.twitch_notifier',
               'zoinks.cogs.youtube_notifier')
@@ -32,18 +33,18 @@ class ZOINKS(commands.AutoShardedBot):
         self.config = Coolsville()
         self._load_extensions()
 
+    def _configure(self):
+        self.config.configure(guild=self.get_guild(id=Coolsville.GUILD_ID),
+                              rules_channel=self.get_channel(id=Coolsville.RULES_CHANNEL_ID),
+                              notifications_channel=self.get_channel(id=Coolsville.NOTIFICATIONS_CHANNEL_ID))
+        logger.info(f'Defaults configured for {Coolsville.__name__}')
+
     def _load_extensions(self):
         for extension in extensions:
             try:
                 self.load_extension(extension)
             except ModuleNotFoundError as e:
                 logger.warning(e)
-
-    def _configure(self):
-        self.config.configure(guild=self.get_guild(id=Coolsville.GUILD_ID),
-                              rules_channel=self.get_channel(id=Coolsville.RULES_CHANNEL_ID),
-                              notifications_channel=self.get_channel(id=Coolsville.NOTIFICATIONS_CHANNEL_ID))
-        logger.info(f'Defaults configured for {Coolsville.__name__}')
 
     async def close(self):
         await super().close()
