@@ -10,6 +10,7 @@ description = 'Like ZOINKS Scoob!'
 
 extensions = ('zoinks.cogs.berry',
               'zoinks.cogs.new_member',
+              'zoinks.cogs.quote',
               'zoinks.cogs.pin_popular',
               'zoinks.cogs.twitch_notifier',
               'zoinks.cogs.youtube_notifier')
