@@ -49,7 +49,7 @@ def count_berries():
 
 async def send_berry_message(message, berry_count):
     grammar = 'ies' if berry_count != 1 else 'y'
-    descriptor = random.choice('nice', 'cool', 'spooky')
+    descriptor = random.choice('nice', 'cool', 'swell', 'groovy', 'spooky')
     embed = discord.Embed(
         title='🍓 Thanks',
         description='Like, thanks for feeding Scoob!\n\n'
