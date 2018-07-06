@@ -11,8 +11,10 @@ GUEST_ROLE = 'Guest'
 logger = logging.getLogger(__name__)
 
 
-async def _in_correct_channel(ctx):
-    return ctx.guild is not None and ctx.guild == NewMember.guild and ctx.message.channel == NewMember.channel
+async def in_correct_channel(ctx):
+    return (ctx.guild is not None and
+            ctx.guild.id == COOLSVILLE_GUILD_ID and
+            ctx.message.channel.id == RULES_CHANNEL_ID)
 
 
 class NewMember:
@@ -36,37 +38,42 @@ class NewMember:
     ----------
     bot: ZOINKS
         The currently running ZOINKS Discord bot.
+    guild:
+        The Discord guild to perform actions on new members.
+    rules_channel:
+        The Discord channel to direct new members towards.
+    guest_role:
+        The new member Discord role.
     """
-    guild = None
-    channel = None
-    role = None
-
     def __init__(self, bot):
         self.bot = bot
+        self.guild = None
+        self.rules_channel = None
+        self.guest_role = None
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_ready(self):
-        self.__class__.guild = self.bot.get_guild(COOLSVILLE_GUILD_ID)
-        self.__class__.channel = self.bot.get_channel(RULES_CHANNEL_ID)
-        self.__class__.role = discord.utils.get(self.__class__.guild.roles, name=GUEST_ROLE)
+        self.guild = self.bot.get_guild(COOLSVILLE_GUILD_ID)
+        self.rules_channel = self.bot.get_channel(RULES_CHANNEL_ID)
+        self.guest_role = discord.utils.get(self.guild.roles, name=GUEST_ROLE)
 
     async def on_member_join(self, member):
-        if member.guild == self.__class__.guild:
-            await member.add_roles(self.__class__.role)
+        if member.guild == self.guild:
+            await member.add_roles(self.guest_role)
             await member.send(embed=discord.Embed(
                 title='👋 Welcome',
-                description=f'Like, welcome to {self.__class__.guild}!\n\nPlease remember to read over '
-                            f'{self.__class__.channel.mention} to familiarize yourself with what\'s allowed in '
-                            f'{self.__class__.guild}.\n\n If you have any comments, questions, or concerns, '
+                description=f'Like, welcome to {self.guild}!\n\nPlease remember to read over '
+                            f'{self.rules_channel.mention} to familiarize yourself with what\'s allowed in '
+                            f'{self.guild}.\n\n If you have any comments, questions, or concerns, '
                             'please contact an Administrator or a Moderator.\n\nEnjoy your stay!',
                 color=0x4D9C5F))
             logger.info(f'{member} joined')
 
     @commands.command(name='verify', hidden=True)
     @commands.has_role(name='Guest')
-    @commands.check(_in_correct_channel)
+    @commands.check(in_correct_channel)
     async def verify(self, ctx):
-        await ctx.author.remove_roles(self.__class__.role)
+        await ctx.author.remove_roles(self.guest_role)
         await ctx.message.delete()
         logger.info(f'{ctx.author} verified')
 
