@@ -57,14 +57,17 @@ class ZOINKS(commands.AutoShardedBot):
 
         error = getattr(error, 'original', error)
 
-        ignored = (commands.errors.CommandNotFound, commands.errors.DisabledCommand)
-        if isinstance(error, ignored):
+        do_nothing = (commands.errors.CommandNotFound, commands.errors.DisabledCommand)
+        if isinstance(error, do_nothing):
             return
 
-        ignored = (commands.errors.UserInputError, commands.errors.MissingRequiredArgument,
-                   commands.errors.TooManyArguments)
-        if isinstance(error, ignored):
-            # send help for specific command
+        warn = (commands.errors.BadArgument, commands.errors.MissingRequiredArgument,
+                commands.errors.TooManyArguments, commands.errors.UserInputError)
+        if isinstance(error, warn):
+            await ctx.send(embed=discord.Embed(
+                title='⚠ Error',
+                description=f'{str(error)}\n\nUse `{command_prefix}help {ctx.command.name}` for more information.',
+                color=0xFFCB00))
             return
 
-        logger.info(f'Ignoring on_command_error: {error}')
+        logger.info(f'{ctx.command.name} command exception ignored: {error}')
