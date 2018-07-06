@@ -2,6 +2,7 @@ import discord
 
 import logging
 import os
+import random
 
 
 COOLSVILLE_GUILD_ID = 462995863539679242
@@ -48,10 +49,11 @@ def count_berries():
 
 async def send_berry_message(message, berry_count):
     grammar = 'ies' if berry_count != 1 else 'y'
+    descriptor = random.choice('nice', 'cool', 'spooky')
     embed = discord.Embed(
         title='🍓 Thanks',
         description='Like, thanks for feeding Scoob!\n\n'
-                    f'Scoob has now eaten {berry_count} berr{grammar}. Berry nice!',
+                    f'Scoob has now eaten {berry_count} berr{grammar}. Berry {descriptor}!',
         color=0x4D9C5F)
     embed.set_thumbnail(url='https://media.giphy.com/media/T825g5mLEUqE8/giphy.gif')
     await message.channel.send(embed=embed)
