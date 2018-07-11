@@ -13,9 +13,9 @@ extensions = ('zoinks.cogs.berry',
               'zoinks.cogs.quote',
               'zoinks.cogs.pin_popular',
               'zoinks.cogs.twitch_notifier',
-              'zoinks.cogs.youtube_notifier')
+              'zoinks.cogs.youtube_notifier',
               #'zoinks.cogs.webhooks',
-              #'zoinks.cogs.league_of_legends',
+              'zoinks.cogs.league_of_legends')
               #'zoinks.cogs.realm_royale')
 
 logger = logging.getLogger(__name__)
@@ -29,9 +29,7 @@ class ZOINKS(commands.AutoShardedBot):
             description=description,
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self._load_extensions()
 
-    def _load_extensions(self):
         for extension in extensions:
             try:
                 self.load_extension(extension)
