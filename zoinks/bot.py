@@ -3,12 +3,13 @@ from discord.ext import commands
 
 import aiohttp
 import logging
+import os
 
 
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
-extensions = ('zoinks.cogs.berry',
+"""extensions = ('zoinks.cogs.berry',
               'zoinks.cogs.new_member',
               'zoinks.cogs.quote',
               'zoinks.cogs.pin_popular',
@@ -16,7 +17,7 @@ extensions = ('zoinks.cogs.berry',
               'zoinks.cogs.youtube_notifier',
               #'zoinks.cogs.webhooks',
               'zoinks.cogs.league_of_legends')
-              #'zoinks.cogs.realm_royale')
+              #'zoinks.cogs.realm_royale')"""
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +31,18 @@ class ZOINKS(commands.AutoShardedBot):
             pm_help=None)
         self.session = aiohttp.ClientSession(loop=self.loop)
 
-        for extension in extensions:
-            try:
-                self.load_extension(extension)
-            except ModuleNotFoundError as e:
-                logger.warning(e)
+        extensions = set(
+            [os.path.splitext(module)[0] for module in os.listdir('zoinks/cogs/') if module.endswith('.py')])
 
-    async def close(self):
-        await super().close()
-        await self.session.close()
+        self.load_extensions(extensions)
+
+    def load_extensions(self, extensions: set=()):
+        if len(extensions) > 0:
+            for extension in extensions:
+                try:
+                    self.load_extension(extension)
+                except ModuleNotFoundError as e:
+                    logger.warning(e)
 
     async def on_ready(self):
         await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {command_prefix}help'))
@@ -69,3 +73,7 @@ class ZOINKS(commands.AutoShardedBot):
             return
 
         logger.info(f'{ctx.command.name} command exception ignored: {error}')
+
+    async def close(self):
+        await super().close()
+        await self.session.close()
