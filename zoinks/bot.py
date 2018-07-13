@@ -9,6 +9,8 @@ import os
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
+color = 0x4D9C5F
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,6 +31,14 @@ class ZOINKS(commands.AutoShardedBot):
 
         self.load_extensions(extensions)
 
+    def load_extensions(self, extensions: set=()):
+        if len(extensions) > 0:
+            for extension in extensions:
+                try:
+                    self.load_extension(extension)
+                except ModuleNotFoundError as e:
+                    logger.warning(e)
+
     async def close(self):
         await super().close()
         await self.session.close()
@@ -37,13 +47,26 @@ class ZOINKS(commands.AutoShardedBot):
         await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {self.command_prefix}help'))
         logger.info(f'{self.user} logged in')
 
-    async def on_command_error(self, ctx, error):
-        pass
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        await self.process_commands(message)
 
-    def load_extensions(self, extensions: set=()):
-        if len(extensions) > 0:
-            for extension in extensions:
-                try:
-                    self.load_extension(extension)
-                except ModuleNotFoundError as e:
-                    logger.warning(e)
+    async def on_message_edit(self, before, after):
+        await self.process_commands(after)
+
+    async def on_command_error(self, ctx, error):
+        if hasattr(ctx.command, 'on_error'):
+            return
+
+        ignore = (commands.errors.CommandNotFound, commands.errors.UserInputError)
+        if isinstance(error, ignore):
+            return
+
+        display = (commands.errors.DisabledCommand, commands.errors.NoPrivateMessage,
+                   commands.errors.CheckFailure, commands.errors.BadArgument,
+                   commands.errors.MissingRequiredArgument, commands.errors.TooManyArguments)
+        if isinstance(error, display):
+            return await ctx.send(embed=discord.Embed(title='⚠ Error', description=str(error), color=color))
+
+        logger.info(f'Command exception not handled: {error}')
