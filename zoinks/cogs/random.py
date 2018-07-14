@@ -34,11 +34,11 @@ class Random:
 
     @commands.command(aliases=['madlib'])
     async def madlibs(self, ctx):
-        """Starts a game of MadLibs."""
+        """Starts a game of Mad Libs."""
         timeout = 30
         regex = re.compile(r'`(.+?)`+?')
 
-        embed = discord.Embed(title='📓 MadLibs', color=zoinks.bot.color)
+        embed = discord.Embed(title='📓 Mad Libs', color=zoinks.bot.color)
 
         embed.description = f'The game will begin shortly.\n\nYou have {timeout} seconds to respond with each word.'
         await ctx.send(embed=embed)
@@ -68,7 +68,7 @@ class Random:
 
         madlib = regex.sub(lambda replace: str(answers.pop(0)), madlib)
 
-        embed.description = f'The MadLib is complete!\n\n{madlib}'
+        embed.description = f'The Mad Lib is complete!\n\n{madlib}'
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['8ball'])
