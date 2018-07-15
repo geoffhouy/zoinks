@@ -22,11 +22,13 @@ class ContentCreator:
     async def on_member_update(self, before, after):
         if 'content creator' in [role.name.lower() for role in after.roles] and now_streaming_on_twitch(before, after):
             channel = discord.utils.get(after.guild.channels, name='notifications')
-            await channel.send(embed=discord.Embed(
-                title=f'🎥 Twitch',
-                description=f'@everyone, {after.activity.name} is playing `{after.activity.details}`!',
-                url=f'https://www.twitch.tv/{after.activity.twitch_name}',
-                color=0x6441A4))
+            await channel.send(
+                content='Hey @everyone, {after.mention} is now live on Twitch!',
+                embed=discord.Embed(
+                    title=f'🎥 Twitch',
+                    description=f'@everyone, {after.activity.name} is playing `{after.activity.details}`!',
+                    url=f'https://www.twitch.tv/{after.activity.twitch_name}',
+                    color=0x6441A4))
 
     async def on_message(self, message):
         if isinstance(message.channel, discord.DMChannel):
@@ -43,21 +45,26 @@ class ContentCreator:
                         if provider != 'Twitch' and provider != 'YouTube':
                             continue
 
-                        embed = discord.Embed(title=video_embed.get('title'),
-                                              description=video_embed.get('description'),
-                                              url=video_embed.get('url'),
+                        embed = discord.Embed(url=video_embed.get('url'),
                                               color=0xFF0000 if provider == 'YouTube' else 0x6441A4)
 
+                        content = f'Hey @everyone, {member.mention}'
+
                         if provider == 'YouTube':
+                            embed.title = video_embed.get('title')
+                            embed.description = video_embed.get('description')
                             embed.set_author(name=video_embed.get('author').get('name'),
                                              url=video_embed.get('author').get('url'))
+                            content = f'{content} has uploaded a new YouTube video!'
                         else:
+                            embed.title = video_embed.get('description')
                             embed.set_author(name=video_embed.get('title').split('-')[0],
                                              url=video_embed.get('url'))
+                            content = f'{content} is now live on Twitch!'
 
                         embed.set_image(url=video_embed.get('thumbnail').get('url'))
 
-                        await channel.send(embed=embed)
+                        await channel.send(content=content, embed=embed)
 
 
 def setup(bot):
