@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class NewMember:
+class Guest:
     """Represents a cog for a Discord bot.
 
     This cog extends the default on_member_join event function.
@@ -60,4 +60,4 @@ class NewMember:
 
 
 def setup(bot):
-    bot.add_cog(NewMember(bot))
+    bot.add_cog(Guest(bot))
