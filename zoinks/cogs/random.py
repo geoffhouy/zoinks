@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 ZOINKS_EMOJI = '<:ZOINKS:463062621134782474>'
 
-with open('zoinks/resources/text/madlibs.txt', 'r', encoding='utf8') as file:
-    madlibs = [line.rstrip() for line in file]
+with open('zoinks/resources/text/mad_libs.txt', 'r', encoding='utf8') as file:
+    mad_libs = [line.rstrip() for line in file]
 
 with open('zoinks/resources/text/quotes.txt', 'r', encoding='utf8') as file:
     quotes = [line.rstrip().replace('|', '\n') for line in file]
@@ -44,8 +44,8 @@ class Random:
         await ctx.send(embed=embed)
         await asyncio.sleep(3)
 
-        madlib = random.choice(madlibs)
-        blanks = regex.findall(madlib)
+        mad_lib = random.choice(mad_libs)
+        blanks = regex.findall(mad_lib)
         answers = []
 
         def check(message):
@@ -66,9 +66,9 @@ class Random:
 
             await asyncio.sleep(1)
 
-        madlib = regex.sub(lambda replace: str(answers.pop(0)), madlib)
+        mad_lib = regex.sub(lambda replace: str(answers.pop(0)), mad_lib)
 
-        embed.description = f'The Mad Lib is complete!\n\n{madlib}'
+        embed.description = f'The Mad Lib is complete!\n\n{mad_lib}'
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['8ball'])
