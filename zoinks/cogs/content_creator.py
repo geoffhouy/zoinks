@@ -23,7 +23,7 @@ class ContentCreator:
         if 'content creator' in [role.name.lower() for role in after.roles] and now_streaming_on_twitch(before, after):
             channel = discord.utils.get(after.guild.channels, name='notifications')
             await channel.send(
-                content='Hey @everyone, {after.mention} is now live on Twitch!',
+                content=f'Hey @everyone, {after.mention} is now live on Twitch!',
                 embed=discord.Embed(
                     title=f'🎥 Twitch',
                     description=f'@everyone, {after.activity.name} is playing `{after.activity.details}`!',
