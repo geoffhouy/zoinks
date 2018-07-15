@@ -55,7 +55,7 @@ class ContentCreator:
                             embed.description = video_embed.get('description')
                             embed.set_author(name=video_embed.get('author').get('name'),
                                              url=video_embed.get('author').get('url'))
-                            content = f'{content} has uploaded a new YouTube video!'
+                            content = f'{content} uploaded a new YouTube video!'
                         else:
                             embed.title = video_embed.get('description')
                             embed.set_author(name=video_embed.get('title').split('-')[0],
