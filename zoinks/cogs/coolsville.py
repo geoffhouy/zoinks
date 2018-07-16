@@ -54,7 +54,7 @@ def message_from_video_embed(video_embed: dict, member: discord.Member):
 class Coolsville:
     """Represents a cog for a Discord bot.
 
-    This cog provides utilities for the Coolsville server. The above module constants dictate which
+    This cog provides utilities exclusively for the Coolsville server. The above module constants dictate which
     guild, channels, and roles will be used.
     """
     def __init__(self, bot: ZOINKS):
