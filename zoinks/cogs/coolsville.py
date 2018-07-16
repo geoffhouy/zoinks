@@ -13,6 +13,7 @@ COOLSVILLE_RULES_CHANNEL_ID = 462996375794221066
 COOLSVILLE_NOTIFICATIONS_CHANNEL_ID = 462996435839877130
 COOLSVILLE_GUEST_ROLE_ID = 463013242021871617
 COOLSVILLE_CONTENT_CREATOR_ROLE_ID = 462999726250262538
+COOLSVILLE_PIN_DISABLED_CHANNEL_IDS = (462996078430781441, 462996375794221066, 462996408216059914, 462996435839877130)
 
 
 def message_from_video_embed(video_embed, member):
@@ -44,6 +45,7 @@ class Coolsville:
 
     def __init__(self, bot):
         self.bot = bot
+        self.pin_threshold = 10
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_member_join(self, member):
@@ -111,6 +113,34 @@ class Coolsville:
 
             content, embed = message_from_video_embed(video_embed, member)
             await notifications_channel.send(content=content, embed=embed)
+
+    async def on_raw_reaction_add(self, payload):
+        if payload.guild_id != COOLSVILLE_GUILD_ID:
+            return
+
+        if payload.channel_id in COOLSVILLE_PIN_DISABLED_CHANNEL_IDS:
+            return
+
+        channel = self.bot.get_channel(id=payload.channel_id)
+
+        if len(await channel.pins()) == 50:
+            return
+
+        message = await channel.get_message(id=payload.message_id)
+
+        if message.pinned:
+            return
+
+        reaction = next((reaction for reaction in message.reactions if reaction.count >= self.pin_threshold), None)
+        reactor = self.bot.get_guild(COOLSVILLE_GUILD_ID).get_member(user_id=payload.user_id)
+        if reaction is not None:
+            await message.pin()
+            await channel.send(embed=discord.Embed(
+                title='📌 Pin',
+                description=f'Congratulations {message.author.mention}, '
+                            f'your message has been pinned after receiving a {reaction.emoji} from {reactor.mention}!',
+                color=zoinks.bot.color
+            ))
 
     @commands.command(hidden=True)
     @commands.has_role(name='Guest')
