@@ -1,4 +1,5 @@
 import zoinks.bot
+from zoinks.bot import ZOINKS
 
 import discord
 from discord.ext import commands
@@ -8,15 +9,24 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-COOLSVILLE_GUILD_ID = 462995863539679242
-COOLSVILLE_RULES_CHANNEL_ID = 462996375794221066
-COOLSVILLE_NOTIFICATIONS_CHANNEL_ID = 462996435839877130
-COOLSVILLE_GUEST_ROLE_ID = 463013242021871617
-COOLSVILLE_CONTENT_CREATOR_ROLE_ID = 462999726250262538
-COOLSVILLE_PIN_DISABLED_CHANNEL_IDS = (462996078430781441, 462996375794221066, 462996408216059914, 462996435839877130)
+COOLSVILLE_GUILD_ID = 0
+COOLSVILLE_RULES_CHANNEL_ID = 0
+COOLSVILLE_NOTIFICATIONS_CHANNEL_ID = 0
+COOLSVILLE_GUEST_ROLE_ID = 0
+COOLSVILLE_CONTENT_CREATOR_ROLE_ID = 0
+COOLSVILLE_PIN_DISABLED_CHANNEL_IDS = (0, 1)
 
 
-def message_from_video_embed(video_embed, member):
+def message_from_video_embed(video_embed: dict, member: discord.Member):
+    """Builds a message from the specified embedded video.
+
+    :param video_embed: The embedded video in the original message.
+    :param member: The member who sent the original message.
+    :type video_embed: dict
+    :type member: discord.Member
+    :return: The new message with content and an embed.
+    :rtype: tuple
+    """
     provider = video_embed.get('provider').get('name')
 
     embed = discord.Embed(
@@ -42,13 +52,33 @@ def message_from_video_embed(video_embed, member):
 
 
 class Coolsville:
+    """Represents a cog for a Discord bot.
 
-    def __init__(self, bot):
+    This cog provides utilities for the Coolsville server. The above module constants dictate which
+    guild, channels, and roles will be used.
+    """
+    def __init__(self, bot: ZOINKS):
+        """Constructs a new Coolsville object.
+
+        :param bot: The currently running Discord bot.
+        :type bot: ZOINKS
+        """
         self.bot = bot
         self.pin_threshold = 10
         logger.info(f'{self.__class__.__name__} loaded')
 
     async def on_member_join(self, member):
+        """Automates the new member experience.
+
+        1. Assigns the 'Guest' role to the new member.
+        2. Sends the new member a message suggesting to read the '#rules' channel.
+
+        Note: In Coolsville, the 'Guest' role can only read and write in the '#rules' channel.
+
+        :param member: The member that joined the guild.
+        :type member: discord.Member
+        :return: None
+        """
         if member.guild.id != COOLSVILLE_GUILD_ID:
             return
 
@@ -67,6 +97,14 @@ class Coolsville:
         logger.info(f'{member} joined {member.guild}')
 
     async def on_member_update(self, before, after):
+        """Notifies guild members that a 'Content Creator' just started streaming on Twitch.
+
+        :param before: The member before being updated.
+        :param after: The member after being updated.
+        :type before: discord.Member
+        :type after: discord.Member
+        :return: None
+        """
         if after.guild.id != COOLSVILLE_GUILD_ID:
             return
 
@@ -76,7 +114,9 @@ class Coolsville:
         if (isinstance(after.activity, discord.Streaming) and
                 after.activity.twitch_name is not None and
                 not isinstance(before.activity, discord.Streaming)):
-            notifications_channel = self.bot.get_channel(channel_id=COOLSVILLE_NOTIFICATIONS_CHANNEL_ID)
+            notifications_channel = self.bot.get_guild(
+                id=COOLSVILLE_GUILD_ID).get_channel(
+                id=COOLSVILLE_NOTIFICATIONS_CHANNEL_ID)
             await notifications_channel.send(
                 content=f'Hey @everyone, {after.mention} is now live on Twitch!',
                 embed=discord.Embed(
@@ -86,6 +126,16 @@ class Coolsville:
                     color=0x6441A4))
 
     async def on_message(self, message):
+        """Notifies guild members that a 'Content Creator' just uploaded a YouTube video or started streaming on Twitch.
+
+        When a direct message containing a link to the YouTube video, the Twitch stream, or any combination of either
+        is received from a 'Content Creator', the bot will highlight all guild members in the specified
+        '#notifications' channel.
+
+        :param message: The message being processed.
+        :type message: discord.Message
+        :return: None
+        """
         if not isinstance(message.channel, discord.DMChannel):
             return
 
@@ -115,6 +165,12 @@ class Coolsville:
             await notifications_channel.send(content=content, embed=embed)
 
     async def on_raw_reaction_add(self, payload):
+        """Pins a message after receiving (self.pin_threshold) pins of the same emoji.
+
+        :param payload: The details of the reaction.
+        :type payload: discord.RawReactionActionEvent
+        :return: None
+        """
         if payload.guild_id != COOLSVILLE_GUILD_ID:
             return
 
@@ -149,6 +205,7 @@ class Coolsville:
                     ctx.guild.id == COOLSVILLE_GUILD_ID and
                     ctx.channel.id == COOLSVILLE_RULES_CHANNEL_ID)
     async def verify(self, ctx):
+        """Grants basic access to guests."""
         await ctx.author.remove_roles(discord.Object(id=COOLSVILLE_GUEST_ROLE_ID))
         await ctx.author.send(embed=discord.Embed(
             title='✅ Verified', description=f'You\'ve been verified in {ctx.guild}!', color=zoinks.bot.color))
