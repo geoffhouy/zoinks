@@ -31,6 +31,7 @@ class Random:
 
     def __init__(self, bot):
         self.bot = bot
+        logger.info(f'{self.__class__.__name__} loaded')
 
     @commands.command(aliases=['madlib'])
     async def madlibs(self, ctx):
