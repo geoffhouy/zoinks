@@ -1,5 +1,5 @@
 import zoinks.bot
-import zoinks.utils.files as file_utils
+import zoinks.utils.file as file_utils
 
 import discord
 from discord.ext import commands
@@ -16,7 +16,7 @@ from collections import defaultdict
 logger = logging.getLogger(__name__)
 
 FILE_DIR = 'zoinks/data/'
-FILE_NAME = f'{__name__}.json'
+FILE_NAME = 'stats.json'
 FILE_PATH = os.path.join(FILE_DIR, FILE_NAME)
 
 if not os.path.isfile(FILE_PATH):
@@ -35,7 +35,11 @@ def merge_nested_dicts(dict1: dict, dict2: dict):
             merged_dict[key].update(nested_dict)
         else:
             for nested_key, value in nested_dict.items():
-                merged_dict[key][nested_key] = merged_dict.get(key).get(nested_key, 0) + nested_dict.get(nested_key, 0)
+                new = merged_dict.get(key).get(nested_key, 0)
+                old = nested_dict.get(nested_key, 0)
+                diff = abs(new - old)
+                if diff > 0:
+                    merged_dict[key][nested_key] = old + diff
 
     return merged_dict
 
@@ -62,7 +66,7 @@ class Stats:
         self.commands_used_in = data.get('commands_used_in', {})
         self.berries_consumed_in = data.get('berries_consumed_in', {})
 
-    async def save(self):
+    async def save(self, manual=False):
         data = {'messages_read_in': self.messages_read_in,
                 'commands_used_in': self.commands_used_in,
                 'berries_consumed_in': self.berries_consumed_in}
@@ -73,7 +77,10 @@ class Stats:
                 file.seek(0)
                 file.truncate()
                 json.dump(merge_nested_dicts(data, file_data), file, indent=4)
-                logger.info('Saved data')
+                if manual:
+                    logger.info(f'Manually saved {self.__class__.__name__} data')
+                else:
+                    logger.info(f'Saved {self.__class__.__name__} data')
 
     async def save_every(self, delay: int = 60 * 5):
         await self.bot.wait_until_ready()
@@ -116,23 +123,79 @@ class Stats:
     @commands.command(aliases=['save'], hidden=True)
     @commands.is_owner()
     async def manualsave(self, ctx):
-        await self.save()
+        await self.save(manual=True)
         await ctx.author.send(embed=discord.Embed(
             title='✅ Manual Save',
-            description=f'{self.__class__.__name__} data has been successfully saved.',
+            description=f'{self.__class__.__name__} data has been saved successfully.',
             color=zoinks.bot.color))
+
+    def bot_uptime(self):
+        uptime = time.time() - self.bot.start_time
+
+        minutes, seconds = divmod(uptime, 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+
+        fmt = f'{int(hours):01d} hours, {int(minutes):01d} minutes, {seconds:01.2f} seconds'
+        if days > 0:
+            fmt = f'{int(days):01d} days, {fmt}'
+
+        return fmt
 
     @commands.command()
     async def uptime(self, ctx):
-        uptime = time.time() - self.bot.start_time
-        m, s = divmod(uptime, 60)
-        h, m = divmod(m, 60)
-        d, h = divmod(h, 24)
-        fmt = f'{int(d):02d}:{int(h):02d}:{int(m):02d}:{s:05.2f}'
         await ctx.send(embed=discord.Embed(
             title='⏱ Uptime',
-            description=f'{self.bot.__class__.__name__} has been online for {fmt}.',
+            description=f'{self.bot.user.mention} has been online for {self.bot_uptime()}.',
             color=zoinks.bot.color))
+
+    @commands.command(aliases=['about', 'info', 'zoinks'])
+    @commands.check(lambda ctx: ctx.guild)
+    async def stats(self, ctx):
+        embed = discord.Embed(
+            title=f'<:ZOINKS:463062621134782474> {str(self.bot.user.name)} Bot',
+            description=f'{self.bot.user.mention} is an open-source bot. View the latest changes '
+                        'by clicking [here](https://github.com/geoffhouy/zoinks/commits/master).',
+            color=zoinks.bot.color)
+
+        owner = (await self.bot.application_info()).owner
+        embed.set_author(name=owner.display_name,
+                         icon_url=owner.avatar_url,
+                         url='https://github.com/geoffhouy')
+
+        embed.add_field(name='⏱ Uptime',
+                        value=f'{self.bot.user.mention} has been online for {self.bot_uptime()}.',
+                        inline=False)
+
+        members = set(self.bot.get_all_members())
+        members_online = sum(1 for member in members if member.status != discord.Status.offline)
+        embed.add_field(name='🚶 Members',
+                        value=f'{len(members)} ({members_online} online)')
+
+        channels = [channel for channel in self.bot.get_all_channels()]
+        text_channels = sum(1 for channel in channels if type(channel) == discord.channel.TextChannel)
+        embed.add_field(name='📺 Channels',
+                        value=f'{len(channels)} ({text_channels} text channels)')
+
+        embed.add_field(name='🖥 Guilds',
+                        value=str(len(self.bot.guilds)))
+
+        messages_read = self.messages_read_in.get(str(ctx.guild.id), 0)
+        total_messages_read = sum(self.messages_read_in.values())
+        embed.add_field(name='📥 Messages Read',
+                        value=f'{total_messages_read} ({messages_read} here)')
+
+        commands_used = self.commands_used_in.get(str(ctx.guild.id), 0)
+        total_commands_used = sum(self.commands_used_in.values())
+        embed.add_field(name='📤 Commands Used',
+                        value=f'{total_commands_used} ({commands_used} here)')
+
+        berries_consumed = self.berries_consumed_in.get(str(ctx.guild.id), 0)
+        total_berries_consumed = sum(self.berries_consumed_in.values())
+        embed.add_field(name='🍓 Berries Fed To Scoob',
+                        value=f'{total_berries_consumed} ({berries_consumed} here)')
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
