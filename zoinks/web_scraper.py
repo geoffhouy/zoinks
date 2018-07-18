@@ -1,4 +1,4 @@
-from zoinks import utils as utils
+from zoinks.utils import web
 from zoinks.bot import ZOINKS
 
 import discord
@@ -16,7 +16,7 @@ class WebScraper:
     """
     def __init__(self, bot: ZOINKS, output_channel_id: int, source_url: str, navigate_html,
                  delay: int=60 * 60 * 24, color: int=0x4D9C5F, thumbnail_url: str=''):
-        """
+        """Constructs a new web scraper.
 
         :param bot: The currently running ZOINKS Discord bot.
             Used for its session attribute.
@@ -47,7 +47,7 @@ class WebScraper:
         self.last_embed = None
 
     async def find_url_from_source(self):
-        soup = await utils.fetch_soup(self.bot, self.source_url)
+        soup = await web.fetch_soup(self.bot, self.source_url)
         try:
             url = self.navigate_html(soup)
         except AttributeError as e:
@@ -57,7 +57,7 @@ class WebScraper:
             return url
 
     async def build_embed(self, url):
-        soup = await utils.fetch_soup(self.bot, url)
+        soup = await web.fetch_soup(self.bot, url)
 
         if soup is None:
             return None
@@ -92,6 +92,8 @@ class WebScraper:
     async def poll(self):
         await self.bot.wait_until_ready()
         channel = self.bot.get_channel(id=self.output_channel_id)
+        if channel is None:
+            raise ValueError('Invalid output channel')
         prev_url = ''
         while self.is_running:
             url = await self.find_url_from_source()
