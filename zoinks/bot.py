@@ -4,14 +4,15 @@ from discord.ext import commands
 import aiohttp
 import logging
 import os
+import time
 
+
+logger = logging.getLogger(__name__)
 
 command_prefix = '!'
 description = 'Like ZOINKS Scoob!'
 
 color = 0x4D9C5F
-
-logger = logging.getLogger(__name__)
 
 
 class ZOINKS(commands.AutoShardedBot):
@@ -31,6 +32,8 @@ class ZOINKS(commands.AutoShardedBot):
 
         self.load_extensions(extensions)
 
+        self.start_time = time.time()
+
     def load_extensions(self, extensions: set=()):
         if len(extensions) > 0:
             for extension in extensions:
@@ -45,7 +48,7 @@ class ZOINKS(commands.AutoShardedBot):
 
     async def on_ready(self):
         await self.change_presence(activity=discord.Game(name=f'ZOINKS! | {self.command_prefix}help'))
-        logger.info(f'{self.user} logged in')
+        logger.info(f'{self.user} took {(time.time() - self.start_time):.6f} seconds to login')
 
     async def on_message(self, message):
         if message.author.bot:
