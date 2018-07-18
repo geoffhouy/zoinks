@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import random
+import time
 from collections import defaultdict
 
 
@@ -119,6 +120,18 @@ class Stats:
         await ctx.author.send(embed=discord.Embed(
             title='✅ Manual Save',
             description=f'{self.__class__.__name__} data has been successfully saved.',
+            color=zoinks.bot.color))
+
+    @commands.command()
+    async def uptime(self, ctx):
+        uptime = time.time() - self.bot.start_time
+        m, s = divmod(uptime, 60)
+        h, m = divmod(m, 60)
+        d, h = divmod(h, 24)
+        fmt = f'{int(d):02d}:{int(h):02d}:{int(m):02d}:{s:05.2f}'
+        await ctx.send(embed=discord.Embed(
+            title='⏱ Uptime',
+            description=f'{self.bot.__class__.__name__} has been online for {fmt}.',
             color=zoinks.bot.color))
 
 
