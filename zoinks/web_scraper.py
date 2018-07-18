@@ -14,8 +14,14 @@ class WebScraper:
     """Represents a basic web scraper that builds from the specified URL and displays the built
     discord.Embed message in the specified Discord text channel.
     """
-    def __init__(self, bot: ZOINKS, output_channel_id: int, source_url: str, navigate_html,
-                 delay: int=60 * 60 * 24, color: int=0x4D9C5F, thumbnail_url: str=''):
+    def __init__(self, bot: ZOINKS,
+                 output_channel_id: int,
+                 source_url: str,
+                 navigate_html,
+                 use_browser: bool=False,
+                 delay: int=60 * 60 * 24,
+                 color: int=0x4D9C5F,
+                 thumbnail_url: str=''):
         """Constructs a new web scraper.
 
         :param bot: The currently running ZOINKS Discord bot.
@@ -24,6 +30,7 @@ class WebScraper:
         :param source_url: The homepage URL of the content to post.
         :param navigate_html: The BeautifulSoup function chain to find
             the URL of the latest content from the source URL.
+        :param use_browser: Whether or not the site needs a browser for JavaScript content to load correctly.
         :param delay: The time in seconds between checking for new content to post.
         :param color: The color of the discord.Embed to post.
             Typically matched with the homepage color scheme.
@@ -38,6 +45,7 @@ class WebScraper:
             raise ValueError('Source URL must be set')
 
         self.navigate_html = navigate_html
+        self.use_browser = use_browser
         self.delay = delay
 
         self.color = color
@@ -47,7 +55,10 @@ class WebScraper:
         self.last_embed = None
 
     async def find_url_from_source(self):
-        soup = await web.fetch_soup(self.bot, self.source_url)
+        if self.use_browser:
+            soup = await web.fetch_soup_with_browser(self.bot, self.source_url)
+        else:
+            soup = await web.fetch_soup(self.bot, self.source_url)
         try:
             url = self.navigate_html(soup)
         except AttributeError as e:
@@ -57,7 +68,10 @@ class WebScraper:
             return url
 
     async def build_embed(self, url):
-        soup = await web.fetch_soup(self.bot, url)
+        if self.use_browser:
+            soup = await web.fetch_soup_with_browser(self.bot, self.source_url)
+        else:
+            soup = await web.fetch_soup(self.bot, self.source_url)
 
         if soup is None:
             return None
@@ -102,7 +116,7 @@ class WebScraper:
                 embed = await self.build_embed(url)
                 if embed is not None:
                     await channel.send(embed=embed)
-                    logger.info(f'Posted article "{embed.title}"')
+                    logger.info(f'Posted article "{embed.title.strip()}"')
                     self.last_embed = embed
                 prev_url = url
 
