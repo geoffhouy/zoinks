@@ -27,7 +27,7 @@ responses = (
     'Don\'t count on it.', 'My reply is no.', 'My sources say no.', 'Outlook not so good.', 'Very doubtful.')
 
 
-class Random:
+class RNG:
 
     def __init__(self, bot):
         self.bot = bot
@@ -130,4 +130,4 @@ class Random:
 
 
 def setup(bot):
-    bot.add_cog(Random(bot))
+    bot.add_cog(RNG(bot))
