@@ -120,9 +120,9 @@ class Stats:
 
         self.commands_used_in[str(ctx.guild.id)] = self.commands_used_in.get(str(ctx.guild.id), 0) + 1
 
-    @commands.command(aliases=['save'], hidden=True)
+    @commands.command(name='save', hidden=True)
     @commands.is_owner()
-    async def manualsave(self, ctx):
+    async def _save(self, ctx):
         await self.save(manual=True)
         await ctx.author.send(embed=discord.Embed(
             title='✅ Manual Save',
