@@ -12,6 +12,7 @@ ZOINKS is a Discord bot that automates boring stuff, provides interactive games,
 
 ### Plans
 - Add League of Legends and Fortnite profile commands
+- Add music player
 - Add database integration
 
 ### How To Use
