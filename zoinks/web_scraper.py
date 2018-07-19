@@ -1,3 +1,4 @@
+import zoinks.bot
 from zoinks.utils import web
 from zoinks.bot import ZOINKS
 
@@ -22,7 +23,7 @@ class WebScraper:
                  use_browser: bool=False,
                  delay: int=60 * 60 * 24,
                  author: tuple=(None, None),
-                 color: int=0x4D9C5F,
+                 color: int=zoinks.bot.color,
                  thumbnail_url: str=''):
         """Constructs a new web scraper.
 
@@ -89,11 +90,7 @@ class WebScraper:
             if len(description) > 250:
                 description = f'{description[:247]}...'
 
-        embed = discord.Embed(
-            title=title,
-            description=description,
-            url=url,
-            color=self.color)
+        embed = discord.Embed(title=title, description=description, url=url, color=self.color)
 
         image_url = soup.find(property='og:image')
         if image_url:
@@ -164,11 +161,7 @@ class SteamScraper(WebScraper):
 
         url = item.find('guid').get_text(strip=True)
 
-        embed = discord.Embed(
-            title=title,
-            description=clean_description,
-            url=url,
-            color=self.color)
+        embed = discord.Embed(title=title, description=clean_description, url=url, color=self.color)
 
         image_url = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', description)
         if image_url:
