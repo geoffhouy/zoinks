@@ -1,1 +1,2 @@
+# Sample Pizza Mad Lib
 Pizza was invented by a(n) `ADJECTIVE` `NATIONALITY` chef named `PERSON`. To make a pizza, you need to take a lump of `NOUN`, and make a thin, round `ADJECTIVE` `NOUN`. Then you cover it with `ADJECTIVE` sauce, `ADJECTIVE` cheese, and fresh chopped `NOUN`s. Next, you have to bake it in a very hot `NOUN`. When it is done, cut it into `NUMBER` `SHAPE`s. Some kids like `FOOD` pizza the best, but my favorite is `FOOD`. If I could, I would eat pizza `NUMBER` time a day!

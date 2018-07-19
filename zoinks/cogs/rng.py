@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 ZOINKS_EMOJI = '<:ZOINKS:463062621134782474>'
 
 with open('zoinks/resources/text/mad_libs.txt', 'r', encoding='utf8') as file:
-    mad_libs = [line.rstrip() for line in file]
+    mad_libs = [line.rstrip() for line in file if not line.startswith('#')]
 
 with open('zoinks/resources/text/quotes.txt', 'r', encoding='utf8') as file:
     quotes = [line.rstrip().replace('|', '\n') for line in file]
