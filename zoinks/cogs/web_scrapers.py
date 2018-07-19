@@ -189,6 +189,47 @@ class RealmRoyaleScraper(SteamScraper):
             thumbnail_url='https://steamcdn-a.akamaihd.net/steam/apps/813820/capsule_184x69.jpg')
 
 
+class RuneScapeScraper(WebScraper):
+
+    def __init__(self, bot):
+        super().__init__(
+            bot,
+            output_channel_id=OUTPUT_CHANNEL_ID,
+            source_url='https://oldschool.runescape.com/',
+            navigate_html=lambda soup: soup.find(class_='news-article ').find('h3').find('a').get('href'),
+            use_browser=False,
+            delay=60 * 60 * 24,
+            author=('RuneScape', 'https://oldschool.runescape.com/'),
+            color=0x162431,
+            thumbnail_url='https://i.imgur.com/6H15qI6.png'
+        )
+
+    async def build_embed(self, url):
+        soup = await web.fetch_soup(self.bot, self.source_url)
+
+        if soup is None:
+            return None
+
+        content = soup.find(class_='news-article ')
+
+        title = content.find('h3').find('a').get_text(strip=True)
+
+        description = content.find('figure').find('img').get('title').replace('\r', '').replace('\n', '')
+
+        embed = discord.Embed(title=title, description=description, url=url, color=self.color)
+
+        image_url = content.find('figure').find('img').get('src')
+        embed.set_image(url=image_url)
+
+        if self.thumbnail_url:
+            embed.set_thumbnail(url=self.thumbnail_url)
+
+        if self.author:
+            embed.set_author(name=self.author[0], url=self.author[1])
+
+        return embed
+
+
 class DarkestDungeonScraper(SteamScraper):
 
     def __init__(self, bot):
@@ -204,7 +245,12 @@ class DarkestDungeonScraper(SteamScraper):
 
 class WebScrapers:
 
-    __slots__ = ('bot', 'lol_scraper', 'd2_scraper', 'ow_scraper', 'fn_scraper', 'rr_scraper', 'dd_scraper')
+    __slots__ = ('bot',
+                 'lol_scraper', 'd2_scraper',
+                 'ow_scraper',
+                 'fn_scraper', 'rr_scraper',
+                 'rs_scraper',
+                 'dd_scraper')
 
     def __init__(self, bot):
         self.bot = bot
@@ -214,6 +260,7 @@ class WebScrapers:
         self.ow_scraper = OverwatchScraper(self.bot)
         self.fn_scraper = FortniteScraper(self.bot)
         self.rr_scraper = RealmRoyaleScraper(self.bot)
+        self.rs_scraper = RuneScapeScraper(self.bot)
         self.dd_scraper = DarkestDungeonScraper(self.bot)
         self.start_scrapers()
 
@@ -272,6 +319,11 @@ class WebScrapers:
     async def realm(self, ctx):
         status = self._toggle('rr_scraper')
         await ctx.send(embed=self._status_embed('Realm Royale patch notes', status))
+
+    @toggle.command(name='runescape', aliases=['rs'])
+    async def runescape(self, ctx):
+        status = self._toggle('rs_scraper')
+        await ctx.send(embed=self._status_embed('RuneScape patch notes', status))
 
     @toggle.command(name='darkest', aliases=['dd'])
     async def darkest(self, ctx):
