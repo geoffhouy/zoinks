@@ -329,6 +329,7 @@ class WebScrapers:
 
     @commands.group(name='toggle')
     async def toggle(self, ctx):
+        """Turns a web scraper on or off depending on its current status."""
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(
                 title='⚠ Error',
