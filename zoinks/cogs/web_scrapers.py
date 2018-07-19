@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 OUTPUT_CHANNEL_ID = 450344550289113100
 
 
-class LOLWebScraper(WebScraper):
+class LeagueOfLegendsScraper(WebScraper):
 
     BASE_URL = 'https://na.leagueoflegends.com'
 
@@ -63,6 +63,21 @@ class LOLWebScraper(WebScraper):
             embed.set_author(name=self.author[0], url=self.author[1])
 
         return embed
+
+
+class DotaScraper(WebScraper):
+
+    def __init__(self, bot):
+        super().__init__(
+            bot,
+            output_channel_id=OUTPUT_CHANNEL_ID,
+            source_url='https://store.steampowered.com/news/?appids=570&appgroupname=Dota+2&feed=steam_updates',
+            navigate_html=lambda soup: soup.find(class_='newsPostBlock steam_updates').find('a').get('href'),
+            use_browser=False,
+            delay=60 * 60 * 24,
+            author=('Dota 2', ''),
+            color=0xFB3512,
+            thumbnail_url='https://steamcdn-a.akamaihd.net/steam/apps/570/capsule_184x69.jpg')
 
 
 class OverwatchScraper(WebScraper):
@@ -189,12 +204,13 @@ class DarkestDungeonScraper(SteamScraper):
 
 class WebScrapers:
 
-    __slots__ = ('bot', 'lol_scraper', 'ow_scraper', 'fn_scraper', 'rr_scraper', 'dd_scraper')
+    __slots__ = ('bot', 'lol_scraper', 'd2_scraper', 'ow_scraper', 'fn_scraper', 'rr_scraper', 'dd_scraper')
 
     def __init__(self, bot):
         self.bot = bot
 
-        self.lol_scraper = LOLWebScraper(self.bot)
+        self.lol_scraper = LeagueOfLegendsScraper(self.bot)
+        self.d2_scraper = DotaScraper(self.bot)
         self.ow_scraper = OverwatchScraper(self.bot)
         self.fn_scraper = FortniteScraper(self.bot)
         self.rr_scraper = RealmRoyaleScraper(self.bot)
@@ -236,6 +252,11 @@ class WebScrapers:
     async def league(self, ctx):
         status = self._toggle('lol_scraper')
         await ctx.send(embed=self._status_embed('League of Legends patch notes', status))
+
+    @toggle.command(name='dota', aliases=['d2'])
+    async def dota(self, ctx):
+        status = self._toggle('d2_scraper')
+        await ctx.send(embed=self._status_embed('Dota 2 patch notes', status))
 
     @toggle.command(name='overwatch', aliases=['ow'])
     async def overwatch(self, ctx):
