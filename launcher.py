@@ -5,7 +5,7 @@ import logging
 import sys
 
 
-def _setup_logging():
+def setup_logging():
     logging.getLogger('discord').setLevel(logging.WARNING)
     logging.basicConfig(
         format='%(asctime)s %(levelname)s %(name)s: %(message)s',
@@ -15,6 +15,6 @@ def _setup_logging():
 
 
 if __name__ == '__main__':
-    _setup_logging()
+    setup_logging()
     bot = ZOINKS()
     bot.run(config.DISCORD_TOKEN, reconnect=True)
