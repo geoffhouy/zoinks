@@ -31,13 +31,13 @@ class RNG:
 
     def __init__(self, bot):
         self.bot = bot
+        self.regex = re.compile(r'`(.+?)`+?')
         logger.info(f'{self.__class__.__name__} loaded')
 
     @commands.command(aliases=['madlib'])
     async def madlibs(self, ctx):
         """Starts a game of Mad Libs."""
         timeout = 30
-        regex = re.compile(r'`(.+?)`+?')
 
         embed = discord.Embed(title='📓 Mad Libs', color=zoinks.bot.color)
 
@@ -46,7 +46,7 @@ class RNG:
         await asyncio.sleep(3)
 
         mad_lib = random.choice(mad_libs)
-        blanks = regex.findall(mad_lib)
+        blanks = self.regex.findall(mad_lib)
         answers = []
 
         def check(message):
@@ -67,7 +67,7 @@ class RNG:
 
             await asyncio.sleep(1)
 
-        mad_lib = regex.sub(lambda replace: str(answers.pop(0)), mad_lib)
+        mad_lib = self.regex.sub(lambda replace: str(f'__{answers.pop(0)}__'), mad_lib)
 
         embed.description = f'The Mad Lib is complete!\n\n{mad_lib}'
         await ctx.send(embed=embed)
