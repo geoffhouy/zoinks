@@ -149,6 +149,17 @@ class Stats:
             description=f'{self.bot.user.mention} has been online for {self.bot_uptime()}.',
             color=zoinks.bot.color))
 
+    @commands.command()
+    async def ping(self, ctx):
+        t1 = time.time()
+        async with ctx.message.channel.typing():
+            t2 = time.time()
+        ms = (t2 - t1) * 1000.0
+        await ctx.send(embed=discord.Embed(
+            title='⌚ Ping',
+            description=f'{self.bot.user.mention} responded in {ms:.2f} ms.',
+            color=zoinks.bot.color))
+
     @commands.command(aliases=['about', 'info', 'zoinks'])
     @commands.check(lambda ctx: ctx.guild)
     async def stats(self, ctx):
