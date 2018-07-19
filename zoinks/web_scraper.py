@@ -73,9 +73,9 @@ class WebScraper:
 
     async def build_embed(self, url):
         if self.use_browser:
-            soup = await web.fetch_soup_with_browser(self.bot, self.source_url)
+            soup = await web.fetch_soup_with_browser(self.bot, url)
         else:
-            soup = await web.fetch_soup(self.bot, self.source_url)
+            soup = await web.fetch_soup(self.bot, url)
 
         if soup is None:
             return None
