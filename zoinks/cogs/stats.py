@@ -144,6 +144,7 @@ class Stats:
 
     @commands.command()
     async def uptime(self, ctx):
+        """Displays the bot's uptime."""
         await ctx.send(embed=discord.Embed(
             title='⏱ Uptime',
             description=f'{self.bot.user.mention} has been online for {self.bot_uptime()}.',
@@ -151,6 +152,7 @@ class Stats:
 
     @commands.command()
     async def ping(self, ctx):
+        """Pings the bot and displays the response time."""
         t1 = time.time()
         async with ctx.message.channel.typing():
             t2 = time.time()
@@ -163,6 +165,7 @@ class Stats:
     @commands.command(aliases=['about', 'info', 'zoinks'])
     @commands.check(lambda ctx: ctx.guild)
     async def stats(self, ctx):
+        """Displays stats collected by the bot."""
         embed = discord.Embed(
             title=f'<:ZOINKS:463062621134782474> {str(self.bot.user.name)} Bot',
             description=f'{self.bot.user.mention} is an open-source bot. View the latest changes '
