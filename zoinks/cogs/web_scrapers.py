@@ -65,7 +65,52 @@ class LOLWebScraper(WebScraper):
         return embed
 
 
-class FortniteWebScraper(WebScraper):
+class OverwatchScraper(WebScraper):
+
+    def __init__(self, bot):
+        super().__init__(bot,
+                         output_channel_id=OUTPUT_CHANNEL_ID,
+                         source_url='http://playoverwatch.com/en-us/game/patch-notes/pc/',
+                         navigate_html=lambda soup: soup.find(
+                             class_='column lg-3').find(class_='u-float-left').get('href'),
+                         use_browser=True,
+                         delay=60 * 60 * 24,
+                         author=('Overwatch', 'https://playoverwatch.com/en-us/'),
+                         color=0xFA9C1E,
+                         thumbnail_url='https://i.imgur.com/E1CqJXn.png')
+
+    async def build_embed(self, url):
+        url = f'{self.source_url}{url}'
+
+        soup = await web.fetch_soup_with_browser(self.bot, url)
+
+        if soup is None:
+            return None
+
+        content = soup.find(class_='column lg-9 patch-notes-body')
+
+        patch_number = url.split('#')[1]
+
+        title = soup.find('a', href=f'#{patch_number}').find('h3').get_text(strip=True)
+
+        description = content.find('p').get_text(strip=True)
+
+        embed = discord.Embed(title=title, description=description, url=url, color=self.color)
+
+        image_url = content.find(class_='HeadingBanner').get('style')
+        image_url = image_url[image_url.find('(') + 1:image_url.find(')')]
+        embed.set_image(url=image_url)
+
+        if self.thumbnail_url:
+            embed.set_thumbnail(url=self.thumbnail_url)
+
+        if self.author:
+            embed.set_author(name=self.author[0], url=self.author[1])
+
+        return embed
+
+
+class FortniteScraper(WebScraper):
 
     BASE_URL = 'https://www.epicgames.com'
 
@@ -144,13 +189,14 @@ class DarkestDungeonScraper(SteamScraper):
 
 class WebScrapers:
 
-    __slots__ = ('bot', 'lol_scraper', 'fn_scraper', 'rr_scraper', 'dd_scraper')
+    __slots__ = ('bot', 'lol_scraper', 'ow_scraper', 'fn_scraper', 'rr_scraper', 'dd_scraper')
 
     def __init__(self, bot):
         self.bot = bot
 
         self.lol_scraper = LOLWebScraper(self.bot)
-        self.fn_scraper = FortniteWebScraper(self.bot)
+        self.ow_scraper = OverwatchScraper(self.bot)
+        self.fn_scraper = FortniteScraper(self.bot)
         self.rr_scraper = RealmRoyaleScraper(self.bot)
         self.dd_scraper = DarkestDungeonScraper(self.bot)
         self.start_scrapers()
@@ -179,7 +225,7 @@ class WebScrapers:
         return scraper.is_running
 
     @staticmethod
-    def _error_embed(name, status):
+    def _status_embed(name, status):
         status = 'on' if status else 'off'
         embed = discord.Embed(title='📰 Web Scraper Update',
                               description=f'The {name} web scraper has been turned {status}.',
@@ -189,22 +235,27 @@ class WebScrapers:
     @toggle.command(name='league', aliases=['lol'])
     async def league(self, ctx):
         status = self._toggle('lol_scraper')
-        await ctx.send(embed=self._error_embed('League of Legends patch notes', status))
+        await ctx.send(embed=self._status_embed('League of Legends patch notes', status))
+
+    @toggle.command(name='overwatch', aliases=['ow'])
+    async def overwatch(self, ctx):
+        status = self._toggle('ow_scraper')
+        await ctx.send(embed=self._status_embed('Overwatch patch notes', status))
 
     @toggle.command(name='fortnite', aliases=['fn'])
     async def fortnite(self, ctx):
         status = self._toggle('fn_scraper')
-        await ctx.send(embed=self._error_embed('Fortnite patch notes', status))
+        await ctx.send(embed=self._status_embed('Fortnite patch notes', status))
 
     @toggle.command(name='realm', aliases=['rr'])
     async def realm(self, ctx):
         status = self._toggle('rr_scraper')
-        await ctx.send(embed=self._error_embed('Realm Royale patch notes', status))
+        await ctx.send(embed=self._status_embed('Realm Royale patch notes', status))
 
     @toggle.command(name='darkest', aliases=['dd'])
     async def darkest(self, ctx):
         status = self._toggle('dd_scraper')
-        await ctx.send(embed=self._error_embed('Darkest Dungeon patch notes', status))
+        await ctx.send(embed=self._status_embed('Darkest Dungeon patch notes', status))
 
 
 def setup(bot):
