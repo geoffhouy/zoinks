@@ -178,37 +178,33 @@ class WebScrapers:
         scraper.is_running = not scraper.is_running
         return scraper.is_running
 
+    @staticmethod
+    def _error_embed(name, status):
+        status = 'on' if status else 'off'
+        embed = discord.Embed(title='📰 Web Scraper Update',
+                              description=f'The {name} web scraper has been turned {status}.',
+                              color=zoinks.bot.color)
+        return embed
+
     @toggle.command(name='league', aliases=['lol'])
     async def league(self, ctx):
         status = self._toggle('lol_scraper')
-        await ctx.send(embed=discord.Embed(
-            title='📰 Web Scraper Update',
-            description=f'The League of Legends patch notes web scraper has been turned {status}.',
-            color=zoinks.bot.color))
+        await ctx.send(embed=self._error_embed('League of Legends patch notes', status))
 
     @toggle.command(name='fortnite', aliases=['fn'])
     async def fortnite(self, ctx):
         status = self._toggle('fn_scraper')
-        await ctx.send(embed=discord.Embed(
-            title='📰 Web Scraper Update',
-            description=f'The Fortnite patch notes web scraper has been turned {status}.',
-            color=zoinks.bot.color))
+        await ctx.send(embed=self._error_embed('Fortnite patch notes', status))
 
     @toggle.command(name='realm', aliases=['rr'])
     async def realm(self, ctx):
         status = self._toggle('rr_scraper')
-        await ctx.send(embed=discord.Embed(
-            title='📰 Web Scraper Update',
-            description=f'The Realm Royale patch notes web scraper has been turned {status}.',
-            color=zoinks.bot.color))
+        await ctx.send(embed=self._error_embed('Realm Royale patch notes', status))
 
     @toggle.command(name='darkest', aliases=['dd'])
     async def darkest(self, ctx):
         status = self._toggle('dd_scraper')
-        await ctx.send(embed=discord.Embed(
-            title='📰 Web Scraper Update',
-            description=f'The Darkest Dungeon patch notes web scraper has been turned {status}.',
-            color=zoinks.bot.color))
+        await ctx.send(embed=self._error_embed('Darkest Dungeon patch notes', status))
 
 
 def setup(bot):
