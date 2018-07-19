@@ -104,6 +104,9 @@ class OverwatchScraper(WebScraper):
 
         content = soup.find(class_='column lg-9 patch-notes-body')
 
+        if content is None:
+            return None
+
         patch_number = url.split('#')[1]
 
         title = soup.find('a', href=f'#{patch_number}').find('h3').get_text(strip=True)
@@ -212,6 +215,9 @@ class RuneScapeScraper(WebScraper):
 
         content = soup.find(class_='news-article ')
 
+        if content is None:
+            return None
+
         title = content.find('h3').find('a').get_text(strip=True)
 
         description = content.find('figure').find('img').get('title').replace('\r', '').replace('\n', '')
@@ -219,6 +225,54 @@ class RuneScapeScraper(WebScraper):
         embed = discord.Embed(title=title, description=description, url=url, color=self.color)
 
         image_url = content.find('figure').find('img').get('src')
+        embed.set_image(url=image_url)
+
+        if self.thumbnail_url:
+            embed.set_thumbnail(url=self.thumbnail_url)
+
+        if self.author:
+            embed.set_author(name=self.author[0], url=self.author[1])
+
+        return embed
+
+
+class MinecraftScraper(WebScraper):
+
+    BASE_URL = 'https://minecraft.net'
+
+    def __init__(self, bot):
+        super().__init__(
+            bot,
+            output_channel_id=OUTPUT_CHANNEL_ID,
+            source_url=f'{self.BASE_URL}/en-us/',
+            navigate_html=lambda soup: soup.find(id='1-2').find('a').get('href'),
+            use_browser=True,
+            delay=60 * 60 * 24,
+            author=('Minecraft', 'https://minecraft.net/en-us/'),
+            color=0x9ECF66,
+            thumbnail_url='https://minecraft.net/favicon-96x96.png'
+        )
+
+    async def build_embed(self, url):
+        url = f'{self.BASE_URL}{url}'
+
+        soup = await web.fetch_soup(self.bot, url)
+
+        if soup is None:
+            return None
+
+        content = soup.find(class_='site-body ')
+
+        if content is None:
+            return None
+
+        title = content.find(class_='container article-paragraph--header').find('h1').get_text(strip=True)
+
+        description = content.find(class_='container article-paragraph--header').find('p').get_text(strip=True)
+
+        embed = discord.Embed(title=title, description=description, url=url, color=self.color)
+
+        image_url = content.find(class_='article-head').find('img').get('src')
         embed.set_image(url=image_url)
 
         if self.thumbnail_url:
@@ -250,6 +304,7 @@ class WebScrapers:
                  'ow_scraper',
                  'fn_scraper', 'rr_scraper',
                  'rs_scraper',
+                 'mc_scraper',
                  'dd_scraper')
 
     def __init__(self, bot):
@@ -261,6 +316,7 @@ class WebScrapers:
         self.fn_scraper = FortniteScraper(self.bot)
         self.rr_scraper = RealmRoyaleScraper(self.bot)
         self.rs_scraper = RuneScapeScraper(self.bot)
+        self.mc_scraper = MinecraftScraper(self.bot)
         self.dd_scraper = DarkestDungeonScraper(self.bot)
         self.start_scrapers()
 
@@ -324,6 +380,11 @@ class WebScrapers:
     async def runescape(self, ctx):
         status = self._toggle('rs_scraper')
         await ctx.send(embed=self._status_embed('RuneScape patch notes', status))
+
+    @toggle.command(name='minecraft', aliases=['mc'])
+    async def minecraft(self, ctx):
+        status = self._toggle('mc_scraper')
+        await ctx.send(embed=self._status_embed('Minecraft news', status))
 
     @toggle.command(name='darkest', aliases=['dd'])
     async def darkest(self, ctx):
