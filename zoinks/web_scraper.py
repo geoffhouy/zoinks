@@ -5,6 +5,7 @@ import discord
 
 import asyncio
 import logging
+import re
 
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ class WebScraper:
                  navigate_html,
                  use_browser: bool=False,
                  delay: int=60 * 60 * 24,
+                 author: tuple=(None, None),
                  color: int=0x4D9C5F,
                  thumbnail_url: str=''):
         """Constructs a new web scraper.
@@ -48,6 +50,7 @@ class WebScraper:
         self.use_browser = use_browser
         self.delay = delay
 
+        self.author = author
         self.color = color
         self.thumbnail_url = thumbnail_url
 
@@ -101,6 +104,9 @@ class WebScraper:
         if self.thumbnail_url:
             embed.set_thumbnail(url=self.thumbnail_url)
 
+        if self.author:
+            embed.set_author(name=self.author[0], url=self.author[1])
+
         return embed
 
     async def poll(self):
@@ -121,3 +127,58 @@ class WebScraper:
                 prev_url = url
 
             await asyncio.sleep(self.delay)
+
+
+class SteamScraper(WebScraper):
+
+    def __init__(self, bot, output_channel_id, steam_app_id, delay, author, color, thumbnail_url):
+        source_url = f'https://steamcommunity.com/games/{steam_app_id}/rss/'
+        super().__init__(bot,
+                         output_channel_id=output_channel_id,
+                         source_url=source_url,
+                         navigate_html=None,
+                         use_browser=False,
+                         delay=delay,
+                         author=author,
+                         color=color,
+                         thumbnail_url=thumbnail_url)
+
+    async def find_url_from_source(self):
+        soup = await web.fetch_soup(self.bot, self.source_url)
+        try:
+            item = soup.select_one('item')
+        except AttributeError as e:
+            logger.warning(e)
+            return None
+        else:
+            return item
+
+    async def build_embed(self, item):
+        title = item.find('title').get_text(strip=True)
+
+        description = item.find('description').get_text(strip=True).replace('<br>', '\n')
+
+        clean_description = re.sub('<[^<]+?>', '', description)
+        if len(clean_description) > 250:
+            clean_description = f'{clean_description[:247]}...'
+
+        url = item.find('guid').get_text(strip=True)
+
+        embed = discord.Embed(
+            title=title,
+            description=clean_description,
+            url=url,
+            color=self.color)
+
+        image_url = re.search('<img src=\"(.*\.(?:png|jpg|gif))\"\s+>', description)
+        if image_url:
+            image_url = image_url.group(1)
+            embed.set_image(url=image_url)
+
+        if self.thumbnail_url:
+            embed.set_thumbnail(url=self.thumbnail_url)
+
+        if self.author:
+            embed.set_author(name=self.author[0], url=self.author[1])
+
+        return embed
