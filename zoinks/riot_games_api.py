@@ -104,3 +104,6 @@ class RiotGamesAPI:
 
         async with self.bot.session.get(url=url, params=params) as response:
             return await response.json() if response.status == 200 else None
+
+    async def get_summoner_by_name(self, name):
+        return await self._request(url=URL['summoner_by_name'].format(version=VERSION['summoner'], name=name))
