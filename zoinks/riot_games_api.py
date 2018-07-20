@@ -1,5 +1,4 @@
 import config
-from zoinks.bot import ZOINKS
 
 
 REGION = {
@@ -80,20 +79,20 @@ VERSION = {
 
 class RiotGamesAPI:
 
-    def __init__(self, bot: ZOINKS):
+    def __init__(self, bot):
         self._api_key = config.RIOT_GAMES_API_KEY
+        self._region = 'na'
         self.bot = bot
-        self.region = 'na'
 
     @property
     def region(self):
-        return self.region
+        return self._region
 
     @region.setter
     def region(self, region: str):
         if region not in REGION:
-            raise ValueError('Invalid region')
-        self.region = region
+            raise ValueError(f'Invalid region: {region}')
+        self._region = region
 
     async def _request(self, url: str, **kwargs):
         params = {'api_key': self._api_key}
