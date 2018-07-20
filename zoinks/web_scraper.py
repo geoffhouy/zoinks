@@ -59,6 +59,12 @@ class WebScraper:
         self.last_embed = None
 
     async def find_url_from_source(self):
+        """Finds the specified target URL from the source_url by using the navigate_html BS4 function chain.
+
+        :return: The result of following navigate_html from source_url.
+            Typically used to grab the latest URL to a new news article.
+        :rtype: str
+        """
         if self.use_browser:
             soup = await web.fetch_soup_with_browser(self.bot, self.source_url)
         else:
@@ -72,6 +78,14 @@ class WebScraper:
             return url
 
     async def build_embed(self, url):
+        """Builds an embed from the HTML meta properties of the specified URL.
+
+        Override to change behavior for sites that don't provide meta properties.
+
+        :param url: The URL with the content to post.
+        :return: The built embed to post.
+        :rtype discord.Embed
+        """
         if self.use_browser:
             soup = await web.fetch_soup_with_browser(self.bot, url)
         else:
@@ -107,6 +121,10 @@ class WebScraper:
         return embed
 
     async def poll(self):
+        """Checks for a new URL to post content from every (delay) seconds.
+
+        :return: None
+        """
         await self.bot.wait_until_ready()
         channel = self.bot.get_channel(id=self.output_channel_id)
         if channel is None:
@@ -141,6 +159,7 @@ class SteamScraper(WebScraper):
                          thumbnail_url=thumbnail_url)
 
     async def find_url_from_source(self):
+        """Selects the first item from the Steam RSS XML instead of navigating through html."""
         soup = await web.fetch_soup(self.bot, self.source_url)
         try:
             item = soup.select_one('item')
@@ -151,6 +170,7 @@ class SteamScraper(WebScraper):
             return item
 
     async def build_embed(self, item):
+        """Uses the first XML item to build an embed."""
         title = item.find('title').get_text(strip=True)
 
         description = item.find('description').get_text(strip=True).replace('<br>', '\n')
