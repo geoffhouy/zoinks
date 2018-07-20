@@ -1,5 +1,5 @@
 import zoinks.bot
-import zoinks.utils.file as file_utils
+import zoinks.utils as utils
 
 import discord
 from discord.ext import commands
@@ -10,7 +10,6 @@ import logging
 import os
 import random
 import time
-from collections import defaultdict
 
 
 logger = logging.getLogger(__name__)
@@ -20,28 +19,10 @@ FILE_NAME = 'stats.json'
 FILE_PATH = os.path.join(FILE_DIR, FILE_NAME)
 
 if not os.path.isfile(FILE_PATH):
-    file_utils.new_json_file(
+    utils.new_json_file(
         file_dir=FILE_DIR,
         file_name=FILE_NAME,
         init_dict={'messages_read_in': {}, 'commands_used_in': {}, 'berries_consumed_in': {}})
-
-
-def merge_nested_dicts(dict1: dict, dict2: dict):
-    merged_dict = defaultdict(dict)
-
-    merged_dict.update(dict1)
-    for key, nested_dict in dict2.items():
-        if merged_dict.get(key) is None:
-            merged_dict[key].update(nested_dict)
-        else:
-            for nested_key, value in nested_dict.items():
-                new = merged_dict.get(key).get(nested_key, 0)
-                old = nested_dict.get(nested_key, 0)
-                diff = abs(new - old)
-                if diff > 0:
-                    merged_dict[key][nested_key] = old + diff
-
-    return merged_dict
 
 
 class Stats:
@@ -66,7 +47,7 @@ class Stats:
         self.commands_used_in = data.get('commands_used_in', {})
         self.berries_consumed_in = data.get('berries_consumed_in', {})
 
-    async def save(self, manual=False):
+    def save(self, manual=False):
         data = {'messages_read_in': self.messages_read_in,
                 'commands_used_in': self.commands_used_in,
                 'berries_consumed_in': self.berries_consumed_in}
@@ -76,7 +57,7 @@ class Stats:
             if file_data != data:
                 file.seek(0)
                 file.truncate()
-                json.dump(merge_nested_dicts(data, file_data), file, indent=4)
+                json.dump(utils.merge_nested_dicts(data, file_data), file, indent=4)
                 if manual:
                     logger.info(f'Manually saved {self.__class__.__name__} data')
                 else:
@@ -85,7 +66,7 @@ class Stats:
     async def save_every(self, delay: int = 60 * 5):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed():
-            await self.save()
+            self.save()
             await asyncio.sleep(delay)
 
     async def on_message(self, message):
@@ -123,7 +104,7 @@ class Stats:
     @commands.command(name='save', hidden=True)
     @commands.is_owner()
     async def _save(self, ctx):
-        await self.save(manual=True)
+        self.save(manual=True)
         await ctx.author.send(embed=discord.Embed(
             title='✅ Manual Save',
             description=f'{self.__class__.__name__} data has been saved successfully.',
