@@ -1,6 +1,6 @@
 import config
 import zoinks.bot
-from zoinks.utils import web
+import zoinks.utils as utils
 from zoinks.web_scraper import WebScraper, SteamScraper
 
 import discord
@@ -29,7 +29,7 @@ class LeagueOfLegendsScraper(WebScraper):
                          thumbnail_url='https://i.imgur.com/FaQI0Mw.png')
 
     async def build_embed(self, url):
-        soup = await web.fetch_soup(self.bot, self.source_url)
+        soup = await utils.fetch_soup(self.bot, self.source_url)
 
         if soup is None:
             return None
@@ -96,7 +96,7 @@ class OverwatchScraper(WebScraper):
     async def build_embed(self, url):
         url = f'{self.source_url}{url}'
 
-        soup = await web.fetch_soup_with_browser(self.bot, url)
+        soup = await utils.fetch_soup_with_browser(self.bot, url)
 
         if soup is None:
             return None
@@ -143,7 +143,7 @@ class FortniteScraper(WebScraper):
                          thumbnail_url='https://i.imgur.com/ICluMYQ.png')
 
     async def build_embed(self, url):
-        soup = await web.fetch_soup_with_browser(self.bot, f'{self.BASE_URL}{url}')
+        soup = await utils.fetch_soup_with_browser(self.bot, f'{self.BASE_URL}{url}')
 
         if soup is None:
             return None
@@ -207,7 +207,7 @@ class RuneScapeScraper(WebScraper):
         )
 
     async def build_embed(self, url):
-        soup = await web.fetch_soup(self.bot, self.source_url)
+        soup = await utils.fetch_soup(self.bot, self.source_url)
 
         if soup is None:
             return None
@@ -255,7 +255,7 @@ class MinecraftScraper(WebScraper):
     async def build_embed(self, url):
         url = f'{self.BASE_URL}{url}'
 
-        soup = await web.fetch_soup(self.bot, url)
+        soup = await utils.fetch_soup(self.bot, url)
 
         if soup is None:
             return None

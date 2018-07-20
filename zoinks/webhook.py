@@ -1,5 +1,5 @@
+import zoinks.utils as utils
 from zoinks.bot import ZOINKS
-from zoinks.utils import web
 
 import discord
 
@@ -70,7 +70,7 @@ class Webhook:
 
         async with self.bot.session.post(url=self.endpoint_url,
                                          data=json.dumps(payload, indent=4),
-                                         headers=web.SESSION_POST_HEADERS) as response:
+                                         headers=utils.SESSION_POST_HEADERS) as response:
             if response.status >= 400:
                 logger.info('POST Failed')
                 return False

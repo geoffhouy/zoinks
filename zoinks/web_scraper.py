@@ -1,5 +1,5 @@
 import zoinks.bot
-from zoinks.utils import web
+import zoinks.utils as utils
 from zoinks.bot import ZOINKS
 
 import discord
@@ -66,9 +66,9 @@ class WebScraper:
         :rtype: str
         """
         if self.use_browser:
-            soup = await web.fetch_soup_with_browser(self.bot, self.source_url)
+            soup = await utils.fetch_soup_with_browser(self.bot, self.source_url)
         else:
-            soup = await web.fetch_soup(self.bot, self.source_url)
+            soup = await utils.fetch_soup(self.bot, self.source_url)
         try:
             url = self.navigate_html(soup)
         except AttributeError as e:
@@ -87,9 +87,9 @@ class WebScraper:
         :rtype discord.Embed
         """
         if self.use_browser:
-            soup = await web.fetch_soup_with_browser(self.bot, url)
+            soup = await utils.fetch_soup_with_browser(self.bot, url)
         else:
-            soup = await web.fetch_soup(self.bot, url)
+            soup = await utils.fetch_soup(self.bot, url)
 
         if soup is None:
             return None
@@ -160,7 +160,7 @@ class SteamScraper(WebScraper):
 
     async def find_url_from_source(self):
         """Selects the first item from the Steam RSS XML instead of navigating through html."""
-        soup = await web.fetch_soup(self.bot, self.source_url)
+        soup = await utils.fetch_soup(self.bot, self.source_url)
         try:
             item = soup.select_one('item')
         except AttributeError as e:
