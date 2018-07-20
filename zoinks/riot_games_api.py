@@ -64,16 +64,16 @@ URL = {
 }
 
 VERSION = {
+    'champion-mastery': 3,
     'champion': 3,
-    'champion_mastery': 3,
     'league': 3,
-    'lol_status': 3,
-    'masteries': 3,
+    'lol-static-data': 3,
+    'lol-status': 3,
     'match': 3,
-    'runes': 3,
     'spectator': 3,
-    'static_data': 3,
-    'summoner': 3
+    'summoner': 3,
+    'tournament-stub': 3,
+    'tournament': 3
 }
 
 
@@ -103,3 +103,5 @@ class RiotGamesAPI:
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(url=URL['summoner_by_name'].format(version=VERSION['summoner'], name=name),
                                    region=region)
+
+
