@@ -333,8 +333,8 @@ class WebScrapers:
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=discord.Embed(
                 title='⚠ Error',
-                description='The `toggle` command needs an argument.'),
-                color=zoinks.bot.color)
+                description='The `toggle` command needs an argument.',
+                color=zoinks.bot.color))
 
     def _toggle(self, name):
         if name == 'bot' or name not in self.__slots__:
