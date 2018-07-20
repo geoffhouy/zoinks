@@ -103,4 +103,4 @@ class RiotGamesAPI:
         url = URL['base'].format(platform=REGION[self.region]['platform'], url=url)
 
         async with self.bot.session.get(url=url, params=params) as response:
-            return await response.json()
+            return await response.json() if response.status == 200 else None
