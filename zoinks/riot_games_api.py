@@ -50,17 +50,16 @@ REGION = {
 
 URL = {
     'base': 'https://{platform}.api.riotgames.com/lol/{url}',
-    'champion': 'platform/v{version}/champions',
-    'champion_mastery_by_summoner': 'champion-mastery/v{version}/champion-masteries/by-summoner/{summoner_id}',
-    'league_by_summoner': 'league/v{version}/positions/by-summoner/{summoner_id}',
-    'lol_status': 'status/v{version}/shard-data',
-    'masteries_by_summoner': 'platform/v{version}/masteries/by-summoner/{summoner_id}',
-    'match_by_account': 'match/v{version}/matchlists/by-account/{account_id}',
-    'match_by_match': 'match/v{version}/matches/{match_id}',
-    'runes_by_summoner': 'platform/v{version}/runes/by-summoner/{summoner_id}',
-    'spectator_by_summoner': 'spectator/v{version}/active-games/by-summoner/{summoner_id}',
-    'static_data': 'static-data/v{version}/{category}',
-    'summoner_by_name': 'summoner/v{version}/summoners/by-name/{name}'
+    'champion-mastery-by-summoner-id': 'champion-mastery/v{version}/champion-masteries/by-summoner/{summoner_id}',
+    'champions-by-champion-id': 'platform/v{version}/champions/{champion_id}',
+    'champions': 'platform/v{version}/champions',
+    'league-by-summoner-id': 'league/v{version}/positions/by-summoner/{summoner_id}',
+    'lol-static-data': 'static-data/v{version}/{category}',
+    'lol-status': 'status/v{version}/shard-data',
+    'match-by-match-id': 'match/v{version}/matches/{match_id}',
+    'matchlists-by-account-id': 'match/v{version}/matchlists/by-account/{account_id}',
+    'spectator-by-summoner-id': 'spectator/v{version}/active-games/by-summoner/{summoner_id}',
+    'summoner-by-name': 'summoner/v{version}/summoners/by-name/{name}',
 }
 
 VERSION = {
@@ -100,8 +99,17 @@ class RiotGamesAPI:
         async with self.bot.session.get(url=url, params=params) as response:
             return await response.json() if response.status == 200 else None
 
+    async def get_champion_mastery_by_summoner_id(self, summoner_id: int, region: str=None):
+        return await self._request(
+            url=URL['champion-mastery-by-summoner-id'].format(
+                version=VERSION['champion-mastery'],
+                summoner_id=summoner_id
+            ),
+            region=region)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
-        return await self._request(url=URL['summoner_by_name'].format(version=VERSION['summoner'], name=name),
-                                   region=region)
-
-
+        return await self._request(
+            url=URL['summoner-by-name'].format(
+                version=VERSION['summoner'],
+                name=name),
+            region=region)
