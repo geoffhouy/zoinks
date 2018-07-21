@@ -202,6 +202,20 @@ class RiotGamesAPI:
                 version=VERSION['lol-status']),
             region=region)
 
+    async def get_match_by_match_id(self, match_id: int, region: str=None):
+        return await self._request(
+            url=URL['match-by-match-id'].format(
+                version=VERSION['match'],
+                match_id=match_id),
+            region=region)
+
+    async def get_match_list_by_account_id(self, account_id: int, region: str=None):
+        return await self._request(
+            url=URL['match-lists-by-account-id'].format(
+                version=VERSION['match'],
+                account_id=account_id),
+            region=region)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
