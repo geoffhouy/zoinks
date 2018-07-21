@@ -137,6 +137,20 @@ class RiotGamesAPI:
                 category=f'champions/{champion_id}'),
             region=None)
 
+    async def get_static_item_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='items'),
+            region=None)
+
+    async def get_static_item_data_by_item_id(self, item_id: int):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category=f'items/{item_id}'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
