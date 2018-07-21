@@ -116,6 +116,13 @@ class RiotGamesAPI:
                 champion_id=champion_id),
             region=None)
 
+    async def get_league_by_summoner_id(self, summoner_id: int, region: str=None):
+        return await self._request(
+            url=URL['league-by-summoner-id'].format(
+                version=VERSION['league'],
+                summoner_id=summoner_id),
+            region=region)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
