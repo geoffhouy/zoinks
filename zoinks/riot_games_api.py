@@ -196,6 +196,12 @@ class RiotGamesAPI:
                 category=f'summoner-spells/{id_}'),
             region=None)
 
+    async def get_server_status(self, region: str=None):
+        return await self._request(
+            url=URL['lol-status'].format(
+                version=VERSION['lol-status']),
+            region=region)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
