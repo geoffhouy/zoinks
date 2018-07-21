@@ -216,6 +216,13 @@ class RiotGamesAPI:
                 account_id=account_id),
             region=region)
 
+    async def get_active_game_by_summoner_id(self, summoner_id: int, region: str=None):
+        return await self._request(
+            url=URL['spectator-by-summoner-id'].format(
+                version=VERSION['spectator'],
+                summoner_id=summoner_id),
+            region=region)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
