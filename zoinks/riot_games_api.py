@@ -182,6 +182,20 @@ class RiotGamesAPI:
                 category=f'reforged-runes/{id_}'),
             region=None)
 
+    async def get_static_summoner_spell_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='summoner-spells'),
+            region=None)
+
+    async def get_static_summoner_spell_data_by_id(self, id_: int):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category=f'summoner-spells/{id_}'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
