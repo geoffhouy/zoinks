@@ -158,6 +158,13 @@ class RiotGamesAPI:
                 category='maps'),
             region=None)
 
+    async def get_static_profile_icon_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='profile-icons'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
