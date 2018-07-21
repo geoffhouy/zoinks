@@ -107,7 +107,10 @@ class RiotGamesAPI:
             region=region)
 
     async def get_champion_list(self):
-        return await self._request(url=URL['champions'].format(version=VERSION['champion']), region=None)
+        return await self._request(
+            url=URL['champions'].format(
+                version=VERSION['champion']
+            ), region=None)
 
     async def get_champion_by_champion_id(self, champion_id: int):
         return await self._request(
@@ -130,11 +133,11 @@ class RiotGamesAPI:
                 category='champions'),
             region=None)
 
-    async def get_static_champion_data_by_champion_id(self, champion_id: int):
+    async def get_static_champion_data_by_id(self, id_: int):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
-                category=f'champions/{champion_id}'),
+                category=f'champions/{id_}'),
             region=None)
 
     async def get_static_item_data(self):
@@ -144,11 +147,11 @@ class RiotGamesAPI:
                 category='items'),
             region=None)
 
-    async def get_static_item_data_by_item_id(self, item_id: int):
+    async def get_static_item_data_by_id(self, id_: int):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
-                category=f'items/{item_id}'),
+                category=f'items/{id_}'),
             region=None)
 
     async def get_static_map_data(self):
