@@ -151,6 +151,13 @@ class RiotGamesAPI:
                 category=f'items/{item_id}'),
             region=None)
 
+    async def get_static_map_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='maps'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
