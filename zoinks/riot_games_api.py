@@ -123,6 +123,20 @@ class RiotGamesAPI:
                 summoner_id=summoner_id),
             region=region)
 
+    async def get_static_champion_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='champions'),
+            region=None)
+
+    async def get_static_champion_data_by_champion_id(self, champion_id: int):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category=f'champions/{champion_id}'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
