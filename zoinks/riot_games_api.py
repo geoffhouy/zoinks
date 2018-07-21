@@ -48,20 +48,6 @@ REGION = {
     }
 }
 
-URL = {
-    'base': 'https://{platform}.api.riotgames.com/lol/{url}',
-    'champion-mastery-by-summoner-id': 'champion-mastery/v{version}/champion-masteries/by-summoner/{summoner_id}',
-    'champions-by-champion-id': 'platform/v{version}/champions/{champion_id}',
-    'champions': 'platform/v{version}/champions',
-    'league-by-summoner-id': 'league/v{version}/positions/by-summoner/{summoner_id}',
-    'lol-static-data': 'static-data/v{version}/{category}',
-    'lol-status': 'status/v{version}/shard-data',
-    'match-by-match-id': 'match/v{version}/matches/{match_id}',
-    'matchlists-by-account-id': 'match/v{version}/matchlists/by-account/{account_id}',
-    'spectator-by-summoner-id': 'spectator/v{version}/active-games/by-summoner/{summoner_id}',
-    'summoner-by-name': 'summoner/v{version}/summoners/by-name/{name}',
-}
-
 VERSION = {
     'champion-mastery': 3,
     'champion': 3,
@@ -75,6 +61,20 @@ VERSION = {
     'tournament': 3
 }
 
+URL = {
+    'base': 'https://{platform}.api.riotgames.com/lol/{url}',
+    'champion-mastery-by-summoner-id': 'champion-mastery/v{version}/champion-masteries/by-summoner/{summoner_id}',
+    'champions-by-champion-id': 'platform/v{version}/champions/{champion_id}',
+    'champions': 'platform/v{version}/champions',
+    'league-by-summoner-id': 'league/v{version}/positions/by-summoner/{summoner_id}',
+    'lol-static-data': 'static-data/v{version}/{category}',
+    'lol-status': 'status/v{version}/shard-data',
+    'match-by-match-id': 'match/v{version}/matches/{match_id}',
+    'match-lists-by-account-id': 'match/v{version}/matchlists/by-account/{account_id}',
+    'spectator-by-summoner-id': 'spectator/v{version}/active-games/by-summoner/{summoner_id}',
+    'summoner-by-name': 'summoner/v{version}/summoners/by-name/{name}',
+}
+
 
 class RiotGamesAPI:
 
@@ -83,7 +83,7 @@ class RiotGamesAPI:
         self._default_region = 'na'
         self.bot = bot
 
-    async def _request(self, url: str, region: str, **kwargs):
+    async def _request(self, url, region, **kwargs):
         params = {'api_key': self._api_key}
         for key, value in kwargs.items():
             if key not in params:
@@ -103,9 +103,18 @@ class RiotGamesAPI:
         return await self._request(
             url=URL['champion-mastery-by-summoner-id'].format(
                 version=VERSION['champion-mastery'],
-                summoner_id=summoner_id
-            ),
+                summoner_id=summoner_id),
             region=region)
+
+    async def get_champion_list(self):
+        return await self._request(url=URL['champions'].format(version=VERSION['champion']), region=None)
+
+    async def get_champion_by_champion_id(self, champion_id: int):
+        return await self._request(
+            url=URL['champions-by-champion-id'].format(
+                version=VERSION['champion'],
+                champion_id=champion_id),
+            region=None)
 
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
