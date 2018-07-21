@@ -165,6 +165,20 @@ class RiotGamesAPI:
                 category='profile-icons'),
             region=None)
 
+    async def get_static_reforged_rune_data(self):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category='reforged-runes'),
+            region=None)
+
+    async def get_static_reforged_rune_data_by_id(self, id_: int):
+        return await self._request(
+            url=URL['lol-static-data'].format(
+                version=VERSION['lol-static-data'],
+                category=f'reforged-runes/{id_}'),
+            region=None)
+
     async def get_summoner_by_name(self, name: str, region: str=None):
         return await self._request(
             url=URL['summoner-by-name'].format(
