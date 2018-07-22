@@ -97,7 +97,7 @@ class RiotGamesAPI:
         url = URL['base'].format(platform=REGION[region]['platform'], url=url)
 
         async with self.bot.session.get(url=url, params=params) as response:
-            return await response.json() if response.status == 200 else None
+            return await response.json() if response.status == 200 else response.status
 
     async def get_champion_mastery_by_summoner_id(self, summoner_id: int, region: str=None):
         return await self._request(
