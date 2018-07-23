@@ -1,5 +1,6 @@
 import config
 
+PROFILE_ICON_URL = 'http://ddragon.leagueoflegends.com/cdn/8.14.1/img/profileicon/{icon_id}.png'
 
 REGION = {
     'br': {
@@ -87,12 +88,16 @@ class RiotGamesAPI:
         params = {'api_key': self._api_key}
         for key, value in kwargs.items():
             if key not in params and value is not None:
+                if isinstance(value, bool):
+                    value = str(value).lower()
                 params[key] = value
 
         if region is None:
             region = self._default_region
-        elif region not in REGION:
-            raise ValueError(f'Invalid region: {region}')
+        else:
+            region = region.lower()
+            if region not in REGION:
+                raise ValueError(f'Invalid region: {region}')
 
         url = URL['base'].format(platform=REGION[region]['platform'], url=url)
 
@@ -128,37 +133,41 @@ class RiotGamesAPI:
                 summoner_id=summoner_id),
             region=region)
 
-    async def get_static_champion_data(self, tags: set=None, data_by_id: bool=False):
+    async def get_static_champion_data(self, tags: str='all', data_by_id: bool=False):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='champions'),
             region=None,
+            locale='en_US',
             tags=tags,
             dataById=data_by_id)
 
-    async def get_static_champion_data_by_id(self, id_: int, tags: set=None):
+    async def get_static_champion_data_by_id(self, id_: int, tags: str='all'):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category=f'champions/{id_}'),
             region=None,
+            locale='en_US',
             tags=tags)
 
-    async def get_static_item_data(self, tags: set=None):
+    async def get_static_item_data(self, tags: str='all'):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='items'),
             region=None,
+            locale='en_US',
             tags=tags)
 
-    async def get_static_item_data_by_id(self, id_: int, tags: set=None):
+    async def get_static_item_data_by_id(self, id_: int, tags: str='all'):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category=f'items/{id_}'),
             region=None,
+            locale='en_US',
             tags=tags)
 
     async def get_static_map_data(self):
@@ -166,59 +175,66 @@ class RiotGamesAPI:
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='maps'),
-            region=None)
+            region=None,
+            locale='en_US')
 
     async def get_static_profile_icon_data(self):
-        # locale, version
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='profile-icons'),
-            region=None)
+            region=None,
+            locale='en_US')
 
     async def get_static_reforged_rune_path_data(self):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='reforged-rune-paths'),
-            region=None)
+            region=None,
+            locale='en_US')
 
     async def get_static_reforged_rune_path_data_by_id(self, id_: int):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category=f'reforged-rune-paths/{id_}'),
-            region=None)
+            region=None,
+            locale='en_US')
 
     async def get_static_reforged_rune_data(self):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='reforged-runes'),
-            region=None)
+            region=None,
+            locale='en_US')
 
     async def get_static_reforged_rune_data_by_id(self, id_: int):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category=f'reforged-runes/{id_}'),
-            region=None)
+            region=None,
+            locale='en_US')
 
-    async def get_static_summoner_spell_data(self, tags: set=None, data_by_id: bool=False):
+    async def get_static_summoner_spell_data(self, tags: str='all', data_by_id: bool=False):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category='summoner-spells'),
             region=None,
+            locale='en_US',
             tags=tags,
             dataById=data_by_id)
 
-    async def get_static_summoner_spell_data_by_id(self, id_: int, tags: set=None):
+    async def get_static_summoner_spell_data_by_id(self, id_: int, tags: str='all'):
         return await self._request(
             url=URL['lol-static-data'].format(
                 version=VERSION['lol-static-data'],
                 category=f'summoner-spells/{id_}'),
             region=None,
+            locale='en_US',
             tags=tags)
 
     async def get_server_status(self, region: str=None):
@@ -245,8 +261,8 @@ class RiotGamesAPI:
             champion=champion,
             queue=queue,
             season=season,
-            begin_index=begin_index,
-            end_index=end_index)
+            beginIndex=begin_index,
+            endIndex=end_index)
 
     async def get_active_game_by_summoner_id(self, summoner_id: int, region: str=None):
         return await self._request(
