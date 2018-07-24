@@ -77,6 +77,29 @@ URL = {
 }
 
 
+def queue_name_from_id(id_: int):
+    if id_ == 400 or id_ == 430:
+        return 'Normal 5v5'
+    elif id_ == 420:
+        return 'Ranked Solo 5v5'
+    elif id_ == 440:
+        return 'Ranked Flex 5v5'
+    elif id_ == 450:
+        return 'ARAM 5v5'
+    elif id_ == 460:
+        return 'Normal 3v3'
+    elif id_ == 470:
+        return 'Ranked Flex 3v3'
+    elif id_ == 700:
+        return 'Clash 5v5'
+    elif id_ == 800 or id_ == 810 or id_ == 820:
+        return 'Co-op vs. AI 3v3'
+    elif id_ == 830 or id_ == 840 or id_ == 850:
+        return 'Co-op vs. AI 5v5'
+    else:
+        return 'game'
+
+
 class RiotGamesAPI:
 
     def __init__(self, bot):
