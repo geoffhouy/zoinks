@@ -1,4 +1,3 @@
-import config
 import zoinks.bot
 import zoinks.utils as utils
 from zoinks.web_scraper import WebScraper, SteamScraper
@@ -11,6 +10,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+OUTPUT_CHANNEL_ID = (0, 1)
+
 
 class LeagueOfLegendsScraper(WebScraper):
 
@@ -18,7 +19,7 @@ class LeagueOfLegendsScraper(WebScraper):
 
     def __init__(self, bot):
         super().__init__(bot,
-                         output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+                         output_channel_id=OUTPUT_CHANNEL_ID[0],
                          source_url=f'{self.BASE_URL}/en/news/game-updates/patch',
                          navigate_html=lambda soup: soup.find(
                              class_='views-row views-row-1 views-row-odd views-row-first').find(
@@ -69,7 +70,7 @@ class DotaScraper(WebScraper):
     def __init__(self, bot):
         super().__init__(
             bot,
-            output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+            output_channel_id=OUTPUT_CHANNEL_ID[0],
             source_url='https://store.steampowered.com/news/?appids=570&appgroupname=Dota+2&feed=steam_updates',
             navigate_html=lambda soup: soup.find(class_='newsPostBlock steam_updates').find('a').get('href'),
             use_browser=False,
@@ -83,7 +84,7 @@ class OverwatchScraper(WebScraper):
 
     def __init__(self, bot):
         super().__init__(bot,
-                         output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+                         output_channel_id=OUTPUT_CHANNEL_ID[0],
                          source_url='http://playoverwatch.com/en-us/game/patch-notes/pc/',
                          navigate_html=lambda soup: soup.find(
                              class_='column lg-3').find(class_='u-float-left').get('href'),
@@ -133,7 +134,7 @@ class FortniteScraper(WebScraper):
 
     def __init__(self, bot):
         super().__init__(bot,
-                         output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+                         output_channel_id=OUTPUT_CHANNEL_ID[0],
                          source_url=f'{self.BASE_URL}/fortnite/en-US/news/category/patch%20notes',
                          navigate_html=lambda soup: soup.find(class_='top-featured-activity').find('a').get('href'),
                          use_browser=True,
@@ -183,7 +184,7 @@ class RealmRoyaleScraper(SteamScraper):
     def __init__(self, bot):
         super().__init__(
             bot,
-            output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+            output_channel_id=OUTPUT_CHANNEL_ID[0],
             steam_app_id=813820,
             delay=60 * 60 * 24,
             author=('Realm Royale', ''),
@@ -196,7 +197,7 @@ class RuneScapeScraper(WebScraper):
     def __init__(self, bot):
         super().__init__(
             bot,
-            output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+            output_channel_id=OUTPUT_CHANNEL_ID[0],
             source_url='https://oldschool.runescape.com/',
             navigate_html=lambda soup: soup.find(class_='news-article ').find('h3').find('a').get('href'),
             use_browser=False,
@@ -242,7 +243,7 @@ class MinecraftScraper(WebScraper):
     def __init__(self, bot):
         super().__init__(
             bot,
-            output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+            output_channel_id=OUTPUT_CHANNEL_ID[0],
             source_url=f'{self.BASE_URL}/en-us/',
             navigate_html=lambda soup: soup.find(id='1-2').find('a').get('href'),
             use_browser=True,
@@ -288,7 +289,7 @@ class DarkestDungeonScraper(SteamScraper):
     def __init__(self, bot):
         super().__init__(
             bot,
-            output_channel_id=config.WEB_SCRAPER_OUTPUT_CHANNEL_ID[0],
+            output_channel_id=OUTPUT_CHANNEL_ID[0],
             steam_app_id=262060,
             delay=60 * 60 * 24,
             author=('Darkest Dungeon', ''),
