@@ -8,10 +8,12 @@ ZOINKS is a Discord bot that automates boring stuff, provides interactive games,
 - Message-based, Interactive Games - Provides a plug-and-playable Mad Libs and a scrambled word puzzle game.
 - New Member Handling - Assigns all new members the `Guest` role and sends them a welcome message with a link to the `#rules` channel.
 - Content Creator Notifications - Uses built-in Discord features to notify the specified server of `Content Creator` activity.
-- Popular Message Pinning: Pins a message once it receives a certain number of reactions.
+- Popular Message Pinning - Pins a message once it receives a certain number of reactions.
+- League of Legends Commands - Uses data directly from Riot Games' API.
+  - Currently provides the [`profile [region] [summoner name]`](https://i.imgur.com/7EgwC2k.png) command
 
 ### Plans
-- Add League of Legends and Fortnite profile commands
+- Add League of Legends (in progress) and Fortnite profile commands
 - Add music player
 - Add database integration
 
