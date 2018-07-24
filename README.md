@@ -4,7 +4,7 @@ ZOINKS is a Discord bot that automates boring stuff, provides interactive games,
 
 ### Features
 - Built-in Asynchronous Web Scraping - Fetches data from websites, formats and posts data to Discord when new data is retrieved.
-  - Currently provides patch notes for [League of Legends](https://i.imgur.com/Nsx2Mpc.png), Dota 2, Overwatch, Fortnite, Realm Royale, RuneScape, Minecraft, and Darkest Dungeon.
+  - Currently provides patch notes for [League of Legends](https://i.imgur.com/Nsx2Mpc.png), [Dota 2](https://i.imgur.com/DXTNMZx.png), [Overwatch](https://i.imgur.com/KT5aGzc.png), [Fortnite](https://i.imgur.com/W8YztK0.png), [Realm Royale](https://i.imgur.com/uJ82M1z.png), [RuneScape](https://i.imgur.com/9Z97C9O.png), [Minecraft](https://i.imgur.com/fEp0pFD.png), and [Darkest Dungeon](https://i.imgur.com/Qt9mjzh.png).
 - Message-based, Interactive Games - Provides a plug-and-playable Mad Libs and a scrambled word puzzle game.
 - New Member Handling - Assigns all new members the `Guest` role and sends them a welcome message with a link to the `#rules` channel.
 - Content Creator Notifications - Uses built-in Discord features to notify the specified server of `Content Creator` activity.
