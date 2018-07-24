@@ -160,7 +160,7 @@ class FortniteScraper(WebScraper):
 
         url = f'{self.BASE_URL}{url}'
 
-        embed=discord.Embed(
+        embed = discord.Embed(
             title=title,
             description=description,
             url=url,
