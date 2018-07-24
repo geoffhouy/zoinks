@@ -22,9 +22,10 @@ At this time, I'm unable to run the bot 24/7, so feel free to run an instance of
 1. Install Python 3.6 or higher.
 2. Download this project.
 3. Install external libraries by entering `python3.6 -m pip install -U -r requirements.txt` into a terminal.
-4. Edit the existing `config.py` constants with your bot's details and preferred web scraper output channel.
+4. Edit the existing `config.py` constants with your bot's details and Riot Games API key.
 5. Edit the existing `zoinks/cogs/coolsville.py` constants with your server's details.
-6. Run `launcher.py` by entering `python3.6 launcher.py` into a terminal.
+6. Edit the existing `zoinks/cogs/web_scrapers.py` constants with your preferred output channels.
+7. Run `launcher.py` by entering `python3.6 launcher.py` into a terminal.
 
 Note: Some Python knowledge is required to further personalize the bot.
 
