@@ -74,3 +74,16 @@ def new_json_file(file_dir: str, file_name: str, init_dict: dict):
     if not os.path.isfile(path):
         with open(path, 'w') as file:
             json.dump(init_dict, file, indent=4)
+
+
+def datetime_to_time_ago_string(dt):
+    days = dt.days
+    hours, remainder = divmod(dt.seconds, 3600)
+    if days > 0:
+        text = '{0} days ago'.format(days)
+    else:
+        if hours > 1:
+            text = '{0} hours ago'.format(hours)
+        else:
+            text = 'Less than one hour ago'
+    return text
