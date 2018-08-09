@@ -1,20 +1,22 @@
 # ZOINKS
-
-ZOINKS is a Discord bot that automates boring stuff, provides interactive games, and records simple statistics for my personal Discord server. At the moment, ZOINKS has no database integration.
+`ZOINKS` is a Discord bot that automates boring stuff, provides interactive games, and records simple statistics for my personal Discord server. At the moment, `ZOINKS` has no database integration.
 
 ### Features
-- Built-in Asynchronous Web Scraping - Fetches data from websites, formats and posts data to Discord when new data is retrieved.
-  - Currently provides patch notes for [League of Legends](https://i.imgur.com/Nsx2Mpc.png), [Dota 2](https://i.imgur.com/DXTNMZx.png), [Overwatch](https://i.imgur.com/KT5aGzc.png), [Fortnite](https://i.imgur.com/W8YztK0.png), [Realm Royale](https://i.imgur.com/uJ82M1z.png), [RuneScape](https://i.imgur.com/9Z97C9O.png), [Minecraft](https://i.imgur.com/fEp0pFD.png), and [Darkest Dungeon](https://i.imgur.com/Qt9mjzh.png).
-- Message-based, Interactive Games - Provides a plug-and-playable Mad Libs and a scrambled word puzzle game.
-- New Member Handling - Assigns all new members the `Guest` role and sends them a welcome message with a link to the `#rules` channel.
-- Content Creator Notifications - Uses built-in Discord features to notify the specified server of `Content Creator` activity.
-- Popular Message Pinning - Pins a message once it receives a certain number of reactions.
-- League of Legends Commands - Uses data directly from Riot Games' API.
-  - Currently provides the [`profile [region] [summoner name]`](https://i.imgur.com/7EgwC2k.png) command
+- Asynchronous Web Scraping: Fetch, format, and post new data to Discord.
+  - Provides patch notes for [League of Legends](https://i.imgur.com/Nsx2Mpc.png), [Dota 2](https://i.imgur.com/DXTNMZx.png), [Overwatch](https://i.imgur.com/KT5aGzc.png), [Fortnite](https://i.imgur.com/W8YztK0.png), [Realm Royale](https://i.imgur.com/uJ82M1z.png), [RuneScape](https://i.imgur.com/9Z97C9O.png), [Minecraft](https://i.imgur.com/fEp0pFD.png), and [Darkest Dungeon](https://i.imgur.com/Qt9mjzh.png).
+- Interactive Text Games: Play Mad Libs and a scrambled word puzzle game simply by typing.
+- Moderation Utilities: Automated moderation utilities for specific servers.
+  - New member handling.
+  - Popular message pinning.
+  - Content Creator notifications.
+- League of Legends Commands: Full Riot Games API integration for accurate and up-to-date data.
+  - [`!profile [region] [summoner name]`](https://i.imgur.com/7EgwC2k.png)
 
 ### Plans
-- Add League of Legends (in progress) and Fortnite profile commands
-- Add music player
+- Add more League of Legends commands
+- Add Fortnite commands
+- Add Overwatch commands
+- Add YouTube music player
 - Add database integration
 
 ### How To Use
