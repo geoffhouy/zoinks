@@ -13,11 +13,11 @@
   - [`!profile [region] [summoner name]`](https://i.imgur.com/7EgwC2k.png)
 
 ### Plans
-- Add more League of Legends commands
-- Add Fortnite commands
-- Add Overwatch commands
-- Add YouTube music player
-- Add database integration
+- Add more League of Legends commands.
+- Add Fortnite commands.
+- Add Overwatch commands.
+- Add YouTube music player.
+- Add database integration.
 
 ### How To Use
 At this time, I'm unable to run the bot 24/7, so feel free to run an instance of this bot yourself. To do so, be sure to perform the following steps:
@@ -36,7 +36,8 @@ See [requirements.txt](https://github.com/geoffhouy/zoinks/blob/master/requireme
 
 ### Credits
 [Discord](https://discordapp.com/)  
-[@Rapptz](https://github.com/Rapptz) for [discord.py (rewrite)](https://github.com/Rapptz/discord.py/tree/rewrite)
+[@Rapptz](https://github.com/Rapptz) for [discord.py (rewrite)](https://github.com/Rapptz/discord.py/tree/rewrite)  
+[Riot Games](https://www.riotgames.com/en) for [Riot Games API](https://developer.riotgames.com/)
 
 ### License
 See [LICENSE](https://github.com/geoffhouy/vexillarius/blob/master/LICENSE).
